@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Advisors from "./pages/Advisors";
+import AdvisorDetail from "./pages/AdvisorDetail";
 import Complaints from "./pages/Complaints";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import DashboardLayout from "./components/DashboardLayout";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="samples" element={<Dashboard />} />
               <Route path="users" element={<Users />} />
               <Route path="advisors" element={<Advisors />} />
+              <Route path="advisors/:advisorId" element={<AdvisorDetail />} />
               <Route path="bookings" element={<Dashboard />} />
               <Route path="complaints" element={<Complaints />} />
               <Route path="complaints/:ticketId" element={<ComplaintDetail />} />

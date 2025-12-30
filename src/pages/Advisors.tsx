@@ -29,13 +29,13 @@ const Advisors: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const filteredAdvisors = advisors?.filter((advisor) => {
-    const matchesSearch = 
+    const matchesSearch =
       advisor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       advisor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       advisor.department.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'all' || advisor.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   }) || [];
 
@@ -140,14 +140,18 @@ const Advisors: React.FC = () => {
               ) : filteredAdvisors.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    {searchTerm || statusFilter !== 'all' 
-                      ? 'No advisors found matching your criteria' 
+                    {searchTerm || statusFilter !== 'all'
+                      ? 'No advisors found matching your criteria'
                       : 'No advisors found'}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredAdvisors.map((advisor) => (
-                  <TableRow key={advisor.id}>
+                  <TableRow
+                    key={advisor.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => window.location.href = `/dashboard/advisors/${advisor.id}`}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
