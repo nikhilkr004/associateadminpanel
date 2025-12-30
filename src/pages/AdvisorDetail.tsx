@@ -318,66 +318,172 @@ const AdvisorDetail: React.FC = () => {
 
                 {/* Availability Tab */}
                 <TabsContent value="availability" className="space-y-6 mt-6">
+                    {/* Availability Flags */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Availability Settings</CardTitle>
-                                <CardDescription>Scheduled working hours and days</CardDescription>
+                                <CardTitle>Service Availability</CardTitle>
+                                <CardDescription>Services enabled for this advisor</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground">Working Days</span>
-                                    <span className="font-medium text-right">{advisor.availabilityInfo?.workingDays?.join(', ') || 'None set'}</span>
+                            <CardContent className="space-y-6">
+                                <div>
+                                    <h4 className="text-sm font-semibold mb-3">Instant Services</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {advisor.availabilityInfo?.instantAvailability?.isChatEnabled && <Badge variant="secondary">Instant Chat</Badge>}
+                                        {advisor.availabilityInfo?.instantAvailability?.isAudioCallEnabled && <Badge variant="secondary">Instant Audio</Badge>}
+                                        {advisor.availabilityInfo?.instantAvailability?.isVideoCallEnabled && <Badge variant="secondary">Instant Video</Badge>}
+                                        {!advisor.availabilityInfo?.instantAvailability?.isChatEnabled &&
+                                            !advisor.availabilityInfo?.instantAvailability?.isAudioCallEnabled &&
+                                            !advisor.availabilityInfo?.instantAvailability?.isVideoCallEnabled &&
+                                            <span className="text-sm text-muted-foreground">No instant services enabled</span>}
+                                    </div>
                                 </div>
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground">Hours</span>
-                                    <span className="font-medium">
-                                        {advisor.availabilityInfo?.workingHoursStart && advisor.availabilityInfo?.workingHoursEnd
-                                            ? `${advisor.availabilityInfo.workingHoursStart} - ${advisor.availabilityInfo.workingHoursEnd}`
-                                            : 'Not set'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground">Max Daily Appointments</span>
-                                    <span className="font-medium">{advisor.availabilityInfo?.maxDailyAppointments || 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground">Slot Duration</span>
-                                    <span className="font-medium">{advisor.availabilityInfo?.appointmentDuration ? `${advisor.availabilityInfo.appointmentDuration} min` : 'N/A'}</span>
+                                <div>
+                                    <h4 className="text-sm font-semibold mb-3">Scheduled Services</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {advisor.availabilityInfo?.scheduledAvailability?.isChatEnabled && <Badge variant="outline">Chat</Badge>}
+                                        {advisor.availabilityInfo?.scheduledAvailability?.isAudioCallEnabled && <Badge variant="outline">Audio Call</Badge>}
+                                        {advisor.availabilityInfo?.scheduledAvailability?.isVideoCallEnabled && <Badge variant="outline">Video Call</Badge>}
+                                        {advisor.availabilityInfo?.scheduledAvailability?.isInPersonEnabled && <Badge variant="outline">In-Person</Badge>}
+                                        {advisor.availabilityInfo?.scheduledAvailability?.isOfficeVisitEnabled && <Badge variant="outline">Office Visit</Badge>}
+                                        {!advisor.availabilityInfo?.scheduledAvailability?.isChatEnabled &&
+                                            !advisor.availabilityInfo?.scheduledAvailability?.isAudioCallEnabled &&
+                                            !advisor.availabilityInfo?.scheduledAvailability?.isVideoCallEnabled &&
+                                            !advisor.availabilityInfo?.scheduledAvailability?.isInPersonEnabled &&
+                                            !advisor.availabilityInfo?.scheduledAvailability?.isOfficeVisitEnabled &&
+                                            <span className="text-sm text-muted-foreground">No scheduled services enabled</span>}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Pricing (Per Session/Min)</CardTitle>
-                                <CardDescription>Advisor service rates</CardDescription>
+                                <CardTitle>General Settings</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground flex items-center gap-2"><Phone className="h-4 w-4" /> Audio Call</span>
-                                    <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledAudioFee || 0}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantAudioFee || 0}/min (Instant)</div>
-                                    </div>
+                                <div className="flex justify-between py-2 border-b">
+                                    <span className="text-muted-foreground">Working Days</span>
+                                    <span className="font-medium text-right">{advisor.availabilityInfo?.workingDays?.join(', ') || 'None set'}</span>
                                 </div>
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Video Call</span>
-                                    <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledVideoFee || 0}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantVideoFee || 0}/min (Instant)</div>
-                                    </div>
+                                <div className="flex justify-between py-2 border-b">
+                                    <span className="text-muted-foreground">General Hours</span>
+                                    <span className="font-medium">
+                                        {advisor.availabilityInfo?.workingHoursStart && advisor.availabilityInfo?.workingHoursEnd
+                                            ? `${advisor.availabilityInfo.workingHoursStart} - ${advisor.availabilityInfo.workingHoursEnd}`
+                                            : 'Not set'}
+                                    </span>
                                 </div>
-                                <div className="flex justify-between py-3 border-b">
-                                    <span className="text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Chat</span>
-                                    <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledChatFee || 0}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantChatFee || 0}/min (Instant)</div>
-                                    </div>
+                                <div className="flex justify-between py-2 border-b">
+                                    <span className="text-muted-foreground">Max Daily Appointments</span>
+                                    <span className="font-medium">{advisor.availabilityInfo?.maxDailyAppointments || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between py-2 border-b">
+                                    <span className="text-muted-foreground">Slot Duration</span>
+                                    <span className="font-medium">{advisor.availabilityInfo?.appointmentDuration ? `${advisor.availabilityInfo.appointmentDuration} min` : 'N/A'}</span>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
+
+                    {/* Schedule Slots */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Virtual Schedule */}
+                        <Card className="border-l-4 border-l-blue-500">
+                            <CardHeader>
+                                <CardTitle className="text-blue-700">Virtual Schedule</CardTitle>
+                                <CardDescription>Availability for online sessions</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {advisor.availabilityInfo?.virtualSchedule ? (
+                                    <>
+                                        <div className="flex justify-between items-center bg-blue-50 p-3 rounded-md">
+                                            <span className="flex items-center gap-2 text-sm font-medium text-blue-900"><Clock className="h-4 w-4" /> Time Range</span>
+                                            <span className="font-bold text-blue-700">
+                                                {advisor.availabilityInfo.virtualSchedule.startTime} - {advisor.availabilityInfo.virtualSchedule.endTime}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Active Days</span>
+                                            <div className="flex flex-wrap gap-1">
+                                                {advisor.availabilityInfo.virtualSchedule.activeDays?.map(day => (
+                                                    <Badge key={day} variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">{day}</Badge>
+                                                )) || <span className="text-sm text-muted-foreground">No days selected</span>}
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-2">
+                                            Duration per slot: <span className="font-medium text-foreground">{advisor.availabilityInfo.virtualSchedule.duration} min</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-6 text-muted-foreground">No virtual schedule configured</div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* In-Person Schedule */}
+                        <Card className="border-l-4 border-l-green-500">
+                            <CardHeader>
+                                <CardTitle className="text-green-700">In-Person Schedule</CardTitle>
+                                <CardDescription>Availability for physical visits</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {advisor.availabilityInfo?.inPersonSchedule ? (
+                                    <>
+                                        <div className="flex justify-between items-center bg-green-50 p-3 rounded-md">
+                                            <span className="flex items-center gap-2 text-sm font-medium text-green-900"><Clock className="h-4 w-4" /> Time Range</span>
+                                            <span className="font-bold text-green-700">
+                                                {advisor.availabilityInfo.inPersonSchedule.startTime} - {advisor.availabilityInfo.inPersonSchedule.endTime}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Active Days</span>
+                                            <div className="flex flex-wrap gap-1">
+                                                {advisor.availabilityInfo.inPersonSchedule.activeDays?.map(day => (
+                                                    <Badge key={day} variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200">{day}</Badge>
+                                                )) || <span className="text-sm text-muted-foreground">No days selected</span>}
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-2">
+                                            Duration per slot: <span className="font-medium text-foreground">{advisor.availabilityInfo.inPersonSchedule.duration} min</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-6 text-muted-foreground">No in-person schedule configured</div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Pricing (Per Session/Min)</CardTitle>
+                            <CardDescription>Advisor service rates</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between py-3 border-b">
+                                <span className="text-muted-foreground flex items-center gap-2"><Phone className="h-4 w-4" /> Audio Call</span>
+                                <div className="text-right">
+                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledAudioFee || 0}/session</div>
+                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantAudioFee || 0}/min (Instant)</div>
+                                </div>
+                            </div>
+                            <div className="flex justify-between py-3 border-b">
+                                <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Video Call</span>
+                                <div className="text-right">
+                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledVideoFee || 0}/session</div>
+                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantVideoFee || 0}/min (Instant)</div>
+                                </div>
+                            </div>
+                            <div className="flex justify-between py-3 border-b">
+                                <span className="text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Chat</span>
+                                <div className="text-right">
+                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledChatFee || 0}/session</div>
+                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantChatFee || 0}/min (Instant)</div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 {/* Documents Tab */}
@@ -415,6 +521,38 @@ const AdvisorDetail: React.FC = () => {
                                         <p className="text-xs text-muted-foreground mt-1">Uploaded documents will appear here.</p>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Specialization Certificates Section */}
+                            <div className="mt-8">
+                                <h3 className="text-lg font-semibold mb-4">Specialization Certificates</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {advisor.professionalInfo?.specializationUrls && Object.keys(advisor.professionalInfo.specializationUrls).length > 0 ? (
+                                        Object.entries(advisor.professionalInfo.specializationUrls).map(([name, url]) => (
+                                            <a
+                                                key={name}
+                                                href={url as string}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center p-4 border rounded-lg hover:bg-muted/50 transition-colors group bg-card"
+                                            >
+                                                <div className="p-2 bg-blue-50 text-blue-600 rounded mr-3">
+                                                    <Shield className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium truncate capitalize text-sm">{name} Certificate</p>
+                                                    <p className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Click to view</p>
+                                                </div>
+                                                <ExternalLink className="h-4 w-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity" />
+                                            </a>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-8 text-center border-2 border-dashed rounded-lg bg-muted/5">
+                                            <Shield className="h-6 w-6 text-muted-foreground mx-auto mb-2 opacity-50" />
+                                            <p className="text-muted-foreground text-sm">No specialization certificates found.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
