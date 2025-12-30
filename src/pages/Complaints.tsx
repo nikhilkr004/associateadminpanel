@@ -67,11 +67,22 @@ const Complaints: React.FC = () => {
     const statusCounts = useMemo(() => {
         if (!tickets) return { all: 0, open: 0, in_progress: 0, resolved: 0, closed: 0 };
 
-        return tickets.reduce((acc: any, ticket: SupportTicket) => {
+        type StatusCounts = {
+            all: number;
+            open: number;
+            in_progress: number;
+            resolved: number;
+            closed: number;
+            [key: string]: number; // Add index signature to allow dynamic access
+        };
+
+        return tickets.reduce((acc: StatusCounts, ticket: SupportTicket) => {
             acc.all++;
-            acc[ticket.status]++;
+            if (acc[ticket.status] !== undefined) {
+                acc[ticket.status]++;
+            }
             return acc;
-        }, { all: 0, open: 0, in_progress: 0, resolved: 0, closed: 0 });
+        }, { all: 0, open: 0, in_progress: 0, resolved: 0, closed: 0 } as StatusCounts);
     }, [tickets]);
 
     return (

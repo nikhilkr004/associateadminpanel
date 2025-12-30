@@ -52,7 +52,7 @@ const ComplaintDetail: React.FC = () => {
 
         setIsUpdatingStatus(true);
         try {
-            await updateTicketStatus(ticket.id, newStatus as any);
+            await updateTicketStatus(ticket.id, newStatus as SupportTicket['status']);
             await queryClient.invalidateQueries({ queryKey: ['support-ticket', ticketId] });
             await queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
 
@@ -215,8 +215,8 @@ const ComplaintDetail: React.FC = () => {
                                         <div
                                             key={response.responseId}
                                             className={`p-4 rounded-lg border ${response.respondedBy === 'admin'
-                                                    ? 'bg-primary/5 border-primary/20'
-                                                    : 'bg-muted'
+                                                ? 'bg-primary/5 border-primary/20'
+                                                : 'bg-muted'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between mb-2">
