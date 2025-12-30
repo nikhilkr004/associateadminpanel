@@ -167,6 +167,74 @@ export const getAdvisors = async (): Promise<AdvisorData[]> => {
 };
 
 // Full Advisor Profile Interface
+// Helper Interfaces for Advisor Data
+export interface ScheduleSlot {
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  activeDays: string[];
+  duration: number; // minutes
+  generatedSlots: string[];
+}
+
+export interface AvailabilityConfig {
+  workingDays: string[];
+  workingHoursStart: string;
+  workingHoursEnd: string;
+  appointmentDuration: number;
+  maxDailyAppointments: number;
+  scheduledAvailability: {
+    isChatEnabled: boolean;
+    isAudioCallEnabled: boolean;
+    isVideoCallEnabled: boolean;
+    isInPersonEnabled: boolean;
+    isOfficeVisitEnabled: boolean;
+  };
+  instantAvailability: {
+    isChatEnabled: boolean;
+    isAudioCallEnabled: boolean;
+    isVideoCallEnabled: boolean;
+  };
+  virtualSchedule: ScheduleSlot;
+  inPersonSchedule: ScheduleSlot;
+}
+
+export interface PricingConfig {
+  instantChatFee: number;
+  instantAudioFee: number;
+  instantVideoFee: number;
+  scheduledChatFee: number;
+  scheduledAudioFee: number;
+  scheduledVideoFee: number;
+  scheduledInPersonFee: number;
+}
+
+export interface ContactPreferences {
+  preferredContactMethod: string;
+  responseTime: string;
+}
+
+export interface SystemInfo {
+  userRole: string;
+  accessLevel: string;
+  canGenerateReports: boolean;
+  canManageResources: boolean;
+}
+
+export interface EarningsInfo {
+  totalLifetimeEarnings: number;
+  todayEarnings: number;
+  thisWeekEarnings: number;
+  thisMonthEarnings: number;
+  pendingBalance: number;
+}
+
+export interface TimeInfo {
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  lastLogin: Timestamp;
+}
+
+// Full Advisor Profile Interface
 export interface FullAdvisorProfile {
   id: string; // Document ID
   basicInfo: {
@@ -198,38 +266,10 @@ export interface FullAdvisorProfile {
     university: string;
     highestQualificationUrl: string;
   };
-  availabilityInfo: {
-    workingDays: string[];
-    workingHoursStart: string;
-    workingHoursEnd: string;
-    appointmentDuration: number;
-    maxDailyAppointments: number;
-    scheduledAvailability: {
-      isChatEnabled: boolean;
-      isAudioCallEnabled: boolean;
-      isVideoCallEnabled: boolean;
-      isInPersonEnabled: boolean;
-      isOfficeVisitEnabled: boolean;
-    };
-    instantAvailability: {
-      isChatEnabled: boolean;
-      isAudioCallEnabled: boolean;
-      isVideoCallEnabled: boolean;
-    };
-    virtualSchedule: any; // Keep flexible as structure is complex
-    inPersonSchedule: any;
-  };
-  pricingInfo: {
-    instantChatFee: number;
-    instantAudioFee: number;
-    instantVideoFee: number;
-    scheduledChatFee: number;
-    scheduledAudioFee: number;
-    scheduledVideoFee: number;
-    scheduledInPersonFee: number;
-  };
-  contactPreferences: any;
-  systemInfo: any;
+  availabilityInfo: AvailabilityConfig;
+  pricingInfo: PricingConfig;
+  contactPreferences: ContactPreferences;
+  systemInfo: SystemInfo;
   performanceInfo: {
     totalStudentsAdvised: number;
     rating: number;
@@ -240,8 +280,8 @@ export interface FullAdvisorProfile {
     website: string;
     documentUrls: Record<string, string>;
   };
-  timeInfo: any;
-  earningsInfo: any;
+  timeInfo: TimeInfo;
+  earningsInfo: EarningsInfo;
 }
 
 export const getAdvisorById = async (advisorId: string): Promise<FullAdvisorProfile | null> => {
