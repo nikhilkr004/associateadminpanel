@@ -220,15 +220,35 @@ const AdvisorDetail: React.FC = () => {
                             <CardHeader>
                                 <CardTitle className="text-lg">About</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground leading-relaxed">
-                                    {advisor.professionalInfo?.bio || 'No bio provided.'}
-                                </p>
-                                <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-                                    {advisor.professionalInfo?.languages?.map(lang => (
-                                        <Badge key={lang} variant="secondary">{lang}</Badge>
-                                    ))}
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <h4 className="text-sm font-semibold mb-2">Bio</h4>
+                                    <p className="text-muted-foreground leading-relaxed text-sm">
+                                        {advisor.professionalInfo?.bio || 'No bio provided.'}
+                                    </p>
                                 </div>
+
+                                {advisor.professionalInfo?.languages && advisor.professionalInfo.languages.length > 0 && (
+                                    <div>
+                                        <h4 className="text-sm font-semibold mb-2">Languages</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {advisor.professionalInfo.languages.map(lang => (
+                                                <Badge key={lang} variant="secondary" className="px-2 py-0.5">{lang}</Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {advisor.professionalInfo?.specializations && advisor.professionalInfo.specializations.length > 0 && (
+                                    <div>
+                                        <h4 className="text-sm font-semibold mb-2">Specializations</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {advisor.professionalInfo.specializations.map(spec => (
+                                                <Badge key={spec} variant="outline" className="px-2 py-0.5 border-primary/20 text-primary">{spec}</Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -240,22 +260,26 @@ const AdvisorDetail: React.FC = () => {
                         <CardHeader>
                             <CardTitle>Professional Details</CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                             <div>
-                                <span className="text-sm text-muted-foreground block">Designation</span>
-                                <span className="font-medium">{advisor.professionalInfo?.designation}</span>
+                                <span className="text-sm text-muted-foreground block mb-1">Designation</span>
+                                <span className="font-medium text-base">{advisor.professionalInfo?.designation || 'N/A'}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-muted-foreground block">Department</span>
-                                <span className="font-medium">{advisor.professionalInfo?.department}</span>
+                                <span className="text-sm text-muted-foreground block mb-1">Department</span>
+                                <span className="font-medium text-base">{advisor.professionalInfo?.department || 'N/A'}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-muted-foreground block">Total Experience</span>
-                                <span className="font-medium">{advisor.professionalInfo?.experience} Years</span>
+                                <span className="text-sm text-muted-foreground block mb-1">Total Experience</span>
+                                <span className="font-medium text-base">{advisor.professionalInfo?.experience ? `${advisor.professionalInfo.experience} Years` : 'N/A'}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-muted-foreground block">Office Location</span>
-                                <span className="font-medium">{advisor.professionalInfo?.officeLocation}</span>
+                                <span className="text-sm text-muted-foreground block mb-1">Office Location</span>
+                                <span className="font-medium text-base">{advisor.professionalInfo?.officeLocation || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span className="text-sm text-muted-foreground block mb-1">Employee ID</span>
+                                <span className="font-medium text-base">{advisor.professionalInfo?.employeeId || 'N/A'}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -265,16 +289,25 @@ const AdvisorDetail: React.FC = () => {
                             <CardTitle>Education</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-start gap-4">
-                                <div className="p-3 bg-muted rounded-lg">
+                            <div className="flex items-start gap-4 p-4 border rounded-lg bg-card/50">
+                                <div className="p-3 bg-primary/10 rounded-lg">
                                     <FileText className="h-6 w-6 text-primary" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-lg">{advisor.educationInfo?.highestQualification} in {advisor.educationInfo?.qualificationField}</h4>
-                                    <p className="text-muted-foreground">{advisor.educationInfo?.university}</p>
+                                    <h4 className="font-semibold text-lg">
+                                        {advisor.educationInfo?.highestQualification || 'Qualification'}
+                                        {advisor.educationInfo?.qualificationField ? ` in ${advisor.educationInfo.qualificationField}` : ''}
+                                    </h4>
+                                    <p className="text-muted-foreground">{advisor.educationInfo?.university || 'University not specified'}</p>
+
                                     {advisor.educationInfo?.highestQualificationUrl && (
-                                        <a href={advisor.educationInfo.highestQualificationUrl} target="_blank" rel="noreferrer" className="text-primary text-sm hover:underline flex items-center gap-1 mt-2">
-                                            View Certificate <ExternalLink className="h-3 w-3" />
+                                        <a
+                                            href={advisor.educationInfo.highestQualificationUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-primary hover:underline bg-primary/5 px-3 py-1.5 rounded-md transition-colors"
+                                        >
+                                            View Degree Certificate <ExternalLink className="h-3 w-3" />
                                         </a>
                                     )}
                                 </div>
@@ -292,13 +325,25 @@ const AdvisorDetail: React.FC = () => {
                                 <CardDescription>Scheduled working hours and days</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex justify-between py-2 border-b">
+                                <div className="flex justify-between py-3 border-b">
                                     <span className="text-muted-foreground">Working Days</span>
-                                    <span className="font-medium text-right">{advisor.availabilityInfo?.workingDays?.join(', ')}</span>
+                                    <span className="font-medium text-right">{advisor.availabilityInfo?.workingDays?.join(', ') || 'None set'}</span>
                                 </div>
-                                <div className="flex justify-between py-2 border-b">
+                                <div className="flex justify-between py-3 border-b">
                                     <span className="text-muted-foreground">Hours</span>
-                                    <span className="font-medium">{advisor.availabilityInfo?.workingHoursStart} - {advisor.availabilityInfo?.workingHoursEnd}</span>
+                                    <span className="font-medium">
+                                        {advisor.availabilityInfo?.workingHoursStart && advisor.availabilityInfo?.workingHoursEnd
+                                            ? `${advisor.availabilityInfo.workingHoursStart} - ${advisor.availabilityInfo.workingHoursEnd}`
+                                            : 'Not set'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between py-3 border-b">
+                                    <span className="text-muted-foreground">Max Daily Appointments</span>
+                                    <span className="font-medium">{advisor.availabilityInfo?.maxDailyAppointments || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between py-3 border-b">
+                                    <span className="text-muted-foreground">Slot Duration</span>
+                                    <span className="font-medium">{advisor.availabilityInfo?.appointmentDuration ? `${advisor.availabilityInfo.appointmentDuration} min` : 'N/A'}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -309,25 +354,25 @@ const AdvisorDetail: React.FC = () => {
                                 <CardDescription>Advisor service rates</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex justify-between py-2 border-b">
+                                <div className="flex justify-between py-3 border-b">
                                     <span className="text-muted-foreground flex items-center gap-2"><Phone className="h-4 w-4" /> Audio Call</span>
                                     <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledAudioFee}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantAudioFee}/min (Instant)</div>
+                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledAudioFee || 0}/session</div>
+                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantAudioFee || 0}/min (Instant)</div>
                                     </div>
                                 </div>
-                                <div className="flex justify-between py-2 border-b">
+                                <div className="flex justify-between py-3 border-b">
                                     <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Video Call</span>
                                     <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledVideoFee}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantVideoFee}/min (Instant)</div>
+                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledVideoFee || 0}/session</div>
+                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantVideoFee || 0}/min (Instant)</div>
                                     </div>
                                 </div>
-                                <div className="flex justify-between py-2 border-b">
+                                <div className="flex justify-between py-3 border-b">
                                     <span className="text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Chat</span>
                                     <div className="text-right">
-                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledChatFee}/session</div>
-                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantChatFee}/min (Instant)</div>
+                                        <div className="font-medium">₹{advisor.pricingInfo?.scheduledChatFee || 0}/session</div>
+                                        <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantChatFee || 0}/min (Instant)</div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -344,36 +389,36 @@ const AdvisorDetail: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {advisor.resources?.documentUrls && Object.entries(advisor.resources.documentUrls).map(([name, url]) => (
-                                    <a
-                                        key={name}
-                                        href={url as string}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center p-4 border rounded-lg hover:bg-muted/50 transition-colors group"
-                                    >
-                                        <div className="p-2 bg-primary/10 text-primary rounded mr-3">
-                                            <FileText className="h-5 w-5" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium truncate capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                            <p className="text-xs text-muted-foreground">Click to view</p>
-                                        </div>
-                                        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </a>
-                                ))}
-
-                                {/* Fallback if no documents often happens in dev */}
-                                {(!advisor.resources?.documentUrls || Object.keys(advisor.resources.documentUrls).length === 0) && (
-                                    <div className="col-span-full py-8 text-center text-muted-foreground">
-                                        No documents uploaded.
+                                {advisor.resources?.documentUrls && Object.keys(advisor.resources.documentUrls).length > 0 ? (
+                                    Object.entries(advisor.resources.documentUrls).map(([name, url]) => (
+                                        <a
+                                            key={name}
+                                            href={url as string}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center p-4 border rounded-lg hover:bg-muted/50 transition-colors group bg-card"
+                                        >
+                                            <div className="p-2 bg-primary/10 text-primary rounded mr-3">
+                                                <FileText className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium truncate capitalize text-sm">{name.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                                <p className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Click to view document</p>
+                                            </div>
+                                            <ExternalLink className="h-4 w-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity" />
+                                        </a>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full py-12 text-center border-2 border-dashed rounded-lg bg-muted/10">
+                                        <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-3 opacity-50" />
+                                        <p className="text-muted-foreground font-medium">No documents uploaded yet.</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Uploaded documents will appear here.</p>
                                     </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
-
             </Tabs>
         </div>
     );
