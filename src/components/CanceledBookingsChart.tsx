@@ -11,7 +11,7 @@ const data = [
 
 const CanceledBookingsChart: React.FC = () => {
   return (
-    <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
+    <div className="bg-card rounded-xl p-6 shadow-card border border-border/50 transition-all duration-300 hover:shadow-elevated">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground">Canceled Bookings</h3>
         <Button variant="outline" size="sm" className="gap-2">

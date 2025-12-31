@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useComplaintDetail } from '@/hooks/useComplaintDetail';
-import { updateTicketStatus, addAdminResponse, formatTimestamp } from '@/services/complaintService';
+import { updateTicketStatus, addAdminResponse, formatTimestamp, SupportTicket } from '@/services/complaintService';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
