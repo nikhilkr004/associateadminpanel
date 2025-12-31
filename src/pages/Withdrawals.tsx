@@ -202,7 +202,11 @@ const Withdrawals: React.FC = () => {
             </TableHeader>
             <TableBody>
                 {data.map((req) => (
-                    <TableRow key={req.id}>
+                    <TableRow
+                        key={req.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleAction(req, 'detail')}
+                    >
                         <TableCell className="font-medium">
                             {req.requestedAt?.seconds ? format(new Date(req.requestedAt.seconds * 1000), 'MMM dd, yyyy') : 'N/A'}
                         </TableCell>
