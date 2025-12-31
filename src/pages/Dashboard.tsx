@@ -4,7 +4,7 @@ import { FileDown, Users, Target, UserCheck, Calendar } from 'lucide-react';
 import StatCard from '@/components/StatCard';
 import BookingsChart from '@/components/BookingsChart';
 import CanceledBookingsChart from '@/components/CanceledBookingsChart';
-import UpcomingBookingsTable from '@/components/UpcomingBookingsTable';
+import RecentComplaintsTable from '@/components/RecentComplaintsTable';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -47,35 +47,39 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-slide-down">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <Button className="gap-2 shadow-md">
-          <FileDown className="h-4 w-4" />
+        <Button className="gap-2 shadow-md hover-lift group">
+          <FileDown className="h-4 w-4 transition-transform group-hover:scale-110" />
           Generate Report
         </Button>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Staggered Animation */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+        {statCards.map((stat, index) => (
+          <StatCard key={stat.title} {...stat} delay={index * 100} />
         ))}
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row - With Animation */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <BookingsChart />
+        <div className="lg:col-span-2 animate-slide-up stagger-3">
+          <div className="hover-lift transition-all duration-300">
+            <BookingsChart />
+          </div>
         </div>
-        <div>
-          <CanceledBookingsChart />
+        <div className="animate-slide-up stagger-4">
+          <div className="hover-lift transition-all duration-300">
+            <CanceledBookingsChart />
+          </div>
         </div>
       </div>
 
-      {/* Table */}
-      <UpcomingBookingsTable />
+      {/* Recent Complaints Table */}
+      <RecentComplaintsTable />
     </div>
   );
 };
