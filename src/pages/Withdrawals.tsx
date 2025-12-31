@@ -398,7 +398,29 @@ const Withdrawals: React.FC = () => {
                         <DialogTitle>Confirm Payout</DialogTitle>
                         <DialogDescription>Enter payment transaction details to mark this as completed.</DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+
+                    {selectedRequest && (
+                        <div className="bg-muted/50 p-4 rounded-lg my-4 text-sm space-y-3 border">
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <span className="text-muted-foreground">Beneficiary Name:</span>
+                                <span className="font-medium">{selectedRequest.bankAccountHolderName}</span>
+                            </div>
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <span className="text-muted-foreground">Bank & IFSC:</span>
+                                <span className="font-medium">{selectedRequest.bankName} ({selectedRequest.bankIfscCode})</span>
+                            </div>
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <span className="text-muted-foreground">Account Number:</span>
+                                <span className="font-medium">{selectedRequest.bankAccountNumber}</span>
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                                <span className="font-semibold text-green-700">Net Payable Amount:</span>
+                                <span className="font-bold text-lg text-green-700">₹{selectedRequest.netPayableAmount}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
                         <div className="grid w-full items-center gap-1.5">
                             <Label htmlFor="txnId">Transaction Reference / UTR *</Label>
                             <Input id="txnId" value={transactionId} onChange={e => setTransactionId(e.target.value)} placeholder="e.g. TXN12345678" />
