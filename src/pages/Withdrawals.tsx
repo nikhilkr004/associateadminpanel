@@ -157,8 +157,21 @@ const Withdrawals: React.FC = () => {
     };
 
     const handleApprove = () => {
-        if (!selectedRequest || !user?.uid) return;
-        approveMutation.mutate({ id: selectedRequest.id, adminId: user.uid });
+        if (!selectedRequest) return;
+
+        const adminId = user?.uid;
+        if (!adminId) {
+            console.error("Approval failed: No Admin ID found (user not authenticated?)");
+            toast({
+                title: "Authentication Error",
+                description: "You must be logged in as an admin to approve requests.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        console.log(`Approving request ${selectedRequest.id} by admin ${adminId}`);
+        approveMutation.mutate({ id: selectedRequest.id, adminId });
     };
 
     const handleComplete = () => {
