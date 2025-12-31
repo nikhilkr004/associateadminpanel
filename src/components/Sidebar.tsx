@@ -66,6 +66,11 @@ const clientMenuItems = [
     path: '/dashboard/bookings',
   },
   {
+    label: 'Withdrawals',
+    icon: ClipboardList,
+    path: '/dashboard/withdrawals',
+  },
+  {
     label: 'Complaints',
     icon: MessageSquareWarning,
     path: '/dashboard/complaints',
