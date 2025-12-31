@@ -480,14 +480,35 @@ export const getAdvisorReviews = async (advisorId: string): Promise<AdvisorRevie
     const q = query(reviewsRef);
     const snapshot = await getDocs(q);
 
-    const reviews = snapshot.docs.map(doc => ({
-      id: doc.id,
-      reviewerName: doc.data().reviewerName || doc.data().userName || 'Anonymous',
-      reviewerImage: doc.data().reviewerImage || doc.data().userImage,
-      rating: doc.data().rating || 0,
-      comment: doc.data().comment || doc.data().review || '',
-      createdAt: doc.data().createdAt,
-      bookingType: doc.data().bookingType || 'general'
+    const reviews = await Promise.all(snapshot.docs.map(async (docSnap) => {
+      const data = docSnap.data();
+      let reviewerName = data.reviewerName || data.userName || 'Anonymous';
+      let reviewerImage = data.reviewerImage || data.userImage;
+      const userId = data.userId; // Assuming userId field exists in review doc
+
+      if (userId) {
+        try {
+          const userRef = doc(db, 'users', userId);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            reviewerName = userData.name || reviewerName;
+            reviewerImage = userData.profilePhotoUrl || reviewerImage;
+          }
+        } catch (e) {
+          console.warn(`Failed to fetch user details for review ${docSnap.id}`, e);
+        }
+      }
+
+      return {
+        id: docSnap.id,
+        reviewerName,
+        reviewerImage,
+        rating: data.rating || 0,
+        comment: data.comment || data.review || '',
+        createdAt: data.createdAt,
+        bookingType: data.bookingType || 'general'
+      };
     }));
 
     return reviews.sort((a, b) => {
