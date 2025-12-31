@@ -446,22 +446,11 @@ export const rejectWithdrawalRequest = async (
       throw new Error("Advisor does not exist!");
     }
 
-    // Update Withdrawal Request
     transaction.update(withdrawalRef, {
       status: 'REJECTED',
       rejectedAt: serverTimestamp(),
       rejectionReason: rejectionReason
     });
-
-    // Refund: Decrease pendingWithdrawals (and likely add back to available/pending balance? 
-    // User prompt says: "Refund: Update Advisor Doc → pendingWithdrawals: Decrease by requestedAmount (Unlock funds)."
-    // Usually purely decreasing pending withdrawals doesn't refund. 
-    // It implies the amount was moved from 'Available' to 'PendingWithdrawals' when requested.
-    // So to refund, we must move it back: Decrease 'pendingWithdrawals', Increase 'pendingBalance' (or availableBalance).
-    // The prompt says "Unlock funds".
-    // I'll assume 'pendingBalance' is the available balance for withdrawal based on `EarningsInfo` interface having `pendingBalance`. 
-    // Wait, `EarningsInfo` has `pendingBalance`. 
-    // If request moved money `pendingBalance` -> `pendingWithdrawals`, then refund is `pendingWithdrawals` -> `pendingBalance`.
 
     const advisorData = advisorDoc.data();
     const currentPendingWith = advisorData.earningsInfo?.pendingWithdrawals || 0;
@@ -472,4 +461,113 @@ export const rejectWithdrawalRequest = async (
       'earningsInfo.pendingBalance': currentAvailable + amount
     });
   });
+};
+
+// Advisor Reviews
+export interface AdvisorReview {
+  id: string;
+  reviewerName: string;
+  reviewerImage?: string;
+  rating: number;
+  comment: string;
+  createdAt: Timestamp;
+  bookingType: string;
+}
+
+export const getAdvisorReviews = async (advisorId: string): Promise<AdvisorReview[]> => {
+  try {
+    const reviewsRef = collection(db, 'advisors', advisorId, 'reviews');
+    const q = query(reviewsRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      reviewerName: doc.data().reviewerName || doc.data().userName || 'Anonymous',
+      reviewerImage: doc.data().reviewerImage || doc.data().userImage,
+      rating: doc.data().rating || 0,
+      comment: doc.data().comment || doc.data().review || '',
+      createdAt: doc.data().createdAt,
+      bookingType: doc.data().bookingType || 'general'
+    }));
+  } catch (error) {
+    console.error("Error fetching advisor reviews:", error);
+    return [];
+  }
+};
+
+// Advisor Transactions (Bookings)
+export interface AdvisorTransaction {
+  id: string;
+  type: 'instant' | 'scheduled';
+  userName: string;
+  userImage?: string;
+  serviceType: string;
+  amount: number;
+  status: string;
+  createdAt: Timestamp;
+  duration?: number;
+}
+
+export const getAdvisorTransactions = async (advisorId: string): Promise<AdvisorTransaction[]> => {
+  try {
+    const transactions: AdvisorTransaction[] = [];
+
+    // Fetch instant bookings
+    const instantQuery = query(
+      collection(db, 'instant_bookings'),
+      where('advisorId', '==', advisorId),
+      orderBy('timestamp', 'desc'),
+      firestoreLimit(50)
+    );
+    const instantSnapshot = await getDocs(instantQuery);
+    
+    instantSnapshot.forEach(doc => {
+      const data = doc.data();
+      transactions.push({
+        id: doc.id,
+        type: 'instant',
+        userName: data.userName || data.studentName || 'Unknown User',
+        userImage: data.userImage || data.studentImage,
+        serviceType: data.callType || data.serviceType || 'Chat',
+        amount: data.amount || data.fee || 0,
+        status: data.status || 'completed',
+        createdAt: data.timestamp || data.createdAt,
+        duration: data.duration
+      });
+    });
+
+    // Fetch scheduled bookings
+    const scheduledQuery = query(
+      collection(db, 'scheduled_bookings'),
+      where('advisorId', '==', advisorId),
+      orderBy('timestamp', 'desc'),
+      firestoreLimit(50)
+    );
+    const scheduledSnapshot = await getDocs(scheduledQuery);
+    
+    scheduledSnapshot.forEach(doc => {
+      const data = doc.data();
+      transactions.push({
+        id: doc.id,
+        type: 'scheduled',
+        userName: data.userName || data.studentName || 'Unknown User',
+        userImage: data.userImage || data.studentImage,
+        serviceType: data.callType || data.serviceType || 'Scheduled',
+        amount: data.amount || data.fee || 0,
+        status: data.status || 'completed',
+        createdAt: data.timestamp || data.createdAt,
+        duration: data.duration
+      });
+    });
+
+    // Sort by date descending
+    return transactions.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+  } catch (error) {
+    console.error("Error fetching advisor transactions:", error);
+    return [];
+  }
 };

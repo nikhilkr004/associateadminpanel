@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdvisorDetail } from '@/hooks/useAdvisorDetail';
+import { useAdvisorReviews } from '@/hooks/useAdvisorReviews';
+import { useAdvisorTransactions } from '@/hooks/useAdvisorTransactions';
 import { updateAdvisorStatus } from '@/services/firestoreService';
 import {
     ArrowLeft,
@@ -16,7 +18,11 @@ import {
     ExternalLink,
     Download,
     Clock,
-    Briefcase
+    Briefcase,
+    MessageSquare,
+    CreditCard,
+    Video,
+    Mic
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +40,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui/table';
+import { format } from 'date-fns';
 
 const AdvisorDetail: React.FC = () => {
     const { advisorId } = useParams<{ advisorId: string }>();
@@ -41,6 +56,8 @@ const AdvisorDetail: React.FC = () => {
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const { data: advisor, isLoading, error } = useAdvisorDetail(advisorId || '');
+    const { data: reviews, isLoading: isLoadingReviews } = useAdvisorReviews(advisorId || '');
+    const { data: transactions, isLoading: isLoadingTransactions } = useAdvisorTransactions(advisorId || '');
     const [isUpdating, setIsUpdating] = useState(false);
 
     const handleStatusChange = async (newStatus: string) => {
@@ -186,8 +203,10 @@ const AdvisorDetail: React.FC = () => {
             </Card>
 
             <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 overflow-x-auto">
+                <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 overflow-x-auto flex-wrap">
                     <TabsTrigger value="overview" className="gap-2"><User className="h-4 w-4" /> Overview</TabsTrigger>
+                    <TabsTrigger value="reviews" className="gap-2"><Star className="h-4 w-4" /> Reviews ({reviews?.length || 0})</TabsTrigger>
+                    <TabsTrigger value="transactions" className="gap-2"><CreditCard className="h-4 w-4" /> Transactions ({transactions?.length || 0})</TabsTrigger>
                     <TabsTrigger value="professional" className="gap-2"><Briefcase className="h-4 w-4" /> Professional</TabsTrigger>
                     <TabsTrigger value="availability" className="gap-2"><Clock className="h-4 w-4" /> Availability</TabsTrigger>
                     <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" /> Documents</TabsTrigger>
@@ -252,6 +271,185 @@ const AdvisorDetail: React.FC = () => {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                {/* Reviews Tab */}
+                <TabsContent value="reviews" className="space-y-6 mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Star className="h-5 w-5 text-yellow-500" />
+                                User Reviews
+                            </CardTitle>
+                            <CardDescription>All feedback received from users</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {isLoadingReviews ? (
+                                <div className="space-y-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="flex gap-4 p-4 border rounded-lg animate-pulse">
+                                            <Skeleton className="h-12 w-12 rounded-full" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-20" />
+                                                <Skeleton className="h-4 w-full" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : reviews && reviews.length > 0 ? (
+                                <div className="space-y-4">
+                                    {reviews.map((review, index) => (
+                                        <div
+                                            key={review.id}
+                                            className="flex gap-4 p-4 border rounded-lg hover:bg-muted/30 transition-all duration-300 animate-fade-in"
+                                            style={{ animationDelay: `${index * 50}ms` }}
+                                        >
+                                            <Avatar className="h-12 w-12 border-2 border-background shadow">
+                                                <AvatarImage src={review.reviewerImage} />
+                                                <AvatarFallback className="bg-primary/10 text-primary">
+                                                    {review.reviewerName?.substring(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                    <h4 className="font-semibold">{review.reviewerName}</h4>
+                                                    <div className="flex items-center gap-1 text-yellow-500">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                className={`h-4 w-4 ${i < review.rating ? 'fill-current' : 'opacity-30'}`}
+                                                            />
+                                                        ))}
+                                                        <span className="ml-1 text-sm font-medium text-foreground">{review.rating}/5</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                                    <Badge variant="outline" className="text-xs capitalize">{review.bookingType}</Badge>
+                                                    {review.createdAt && (
+                                                        <span>{format(review.createdAt.toDate(), 'MMM dd, yyyy')}</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{review.comment || 'No comment provided.'}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 border-2 border-dashed rounded-lg bg-muted/10">
+                                    <Star className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                                    <p className="text-muted-foreground font-medium">No reviews yet</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Reviews will appear here once users leave feedback.</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Transactions Tab */}
+                <TabsContent value="transactions" className="space-y-6 mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <CreditCard className="h-5 w-5 text-green-500" />
+                                Transaction History
+                            </CardTitle>
+                            <CardDescription>All bookings and payments for this advisor</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {isLoadingTransactions ? (
+                                <div className="space-y-3">
+                                    {[1, 2, 3, 4].map(i => (
+                                        <div key={i} className="flex items-center gap-4 p-3 animate-pulse">
+                                            <Skeleton className="h-10 w-10 rounded" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-40" />
+                                                <Skeleton className="h-3 w-24" />
+                                            </div>
+                                            <Skeleton className="h-4 w-16" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : transactions && transactions.length > 0 ? (
+                                <div className="rounded-md border overflow-hidden">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow className="bg-muted/30">
+                                                <TableHead>User</TableHead>
+                                                <TableHead>Type</TableHead>
+                                                <TableHead>Service</TableHead>
+                                                <TableHead>Amount</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Date</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {transactions.map((tx, index) => (
+                                                <TableRow
+                                                    key={tx.id}
+                                                    className="hover:bg-muted/20 transition-colors animate-fade-in"
+                                                    style={{ animationDelay: `${index * 30}ms` }}
+                                                >
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar className="h-8 w-8">
+                                                                <AvatarImage src={tx.userImage} />
+                                                                <AvatarFallback className="text-xs bg-primary/10">
+                                                                    {tx.userName?.substring(0, 2).toUpperCase()}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="font-medium text-sm">{tx.userName}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge
+                                                            variant={tx.type === 'instant' ? 'default' : 'secondary'}
+                                                            className={tx.type === 'instant' ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}
+                                                        >
+                                                            {tx.type === 'instant' ? 'Instant' : 'Scheduled'}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-1.5">
+                                                            {tx.serviceType?.toLowerCase().includes('video') && <Video className="h-4 w-4 text-blue-500" />}
+                                                            {tx.serviceType?.toLowerCase().includes('audio') && <Mic className="h-4 w-4 text-green-500" />}
+                                                            {tx.serviceType?.toLowerCase().includes('chat') && <MessageSquare className="h-4 w-4 text-purple-500" />}
+                                                            <span className="capitalize text-sm">{tx.serviceType}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="font-semibold text-green-600">₹{tx.amount}</span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={
+                                                                tx.status === 'completed' ? 'border-green-300 bg-green-50 text-green-700' :
+                                                                tx.status === 'cancelled' ? 'border-red-300 bg-red-50 text-red-700' :
+                                                                tx.status === 'pending' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
+                                                                'border-gray-300 bg-gray-50 text-gray-700'
+                                                            }
+                                                        >
+                                                            {tx.status}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-muted-foreground">
+                                                        {tx.createdAt ? format(tx.createdAt.toDate(), 'MMM dd, yyyy HH:mm') : 'N/A'}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 border-2 border-dashed rounded-lg bg-muted/10">
+                                    <CreditCard className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                                    <p className="text-muted-foreground font-medium">No transactions yet</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Booking transactions will appear here.</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 {/* Professional Tab */}
