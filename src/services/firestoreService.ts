@@ -18,7 +18,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 
-// Dashboard Stats
+// Dashbor;
 export interface DashboardStats {
   totalUsers: number;
   totalAdvisors: number;
@@ -426,6 +426,7 @@ export const completeWithdrawalRequest = async (
 
     transaction.update(advisorRef, {
       'earningsInfo.pendingWithdrawals': newPendingWithdrawals,
+      'earningsInfo.totalWithdrawn': newTotalWithdrawn,
       'earningsInfo.totalWithdrawn': newTotalWithdrawn
     });
   });
