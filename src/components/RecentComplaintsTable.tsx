@@ -9,8 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useComplaints } from '@/hooks/useComplaints';
-import { formatTimestamp, SupportTicket } from '@/services/complaintService';
+import { useComplaints, SupportTicket } from '@/hooks/useComplaints';
+import { formatTimestamp } from '@/services/complaintService';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityBadge from '@/components/PriorityBadge';
