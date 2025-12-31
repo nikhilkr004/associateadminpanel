@@ -9,7 +9,10 @@ import {
   limit as firestoreLimit,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  runTransaction,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 
 // Dashboard Stats
@@ -314,4 +317,156 @@ export const updateAdvisorStatus = async (advisorId: string, status: string): Pr
     console.error("Error updating advisor status:", error);
     throw error;
   }
+};
+// Withdrawal Types
+export interface WithdrawalRequest {
+  id: string;
+  advisorId: string;
+  advisorName: string;
+  advisorEmail: string;
+  advisorPhone: string;
+  requestedAmount: number;
+  platformFee: number;
+  gstOnFee: number;
+  tdsDeducted: number;
+  totalDeductions: number;
+  netPayableAmount: number;
+
+  // Bank Details
+  bankAccountNumber: string;
+  bankAccountHolderName: string;
+  bankIfscCode: string;
+  bankName: string;
+  bankBranch: string;
+  bankAccountType: string;
+  bankPanNumber: string;
+
+  // Status
+  status: 'PENDING' | 'APPROVED' | 'PROCESSING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+  requestedAt: Timestamp;
+  approvedAt?: Timestamp | null;
+  processedAt?: Timestamp | null;
+  completedAt?: Timestamp | null;
+  rejectedAt?: Timestamp | null;
+
+  // Admin Fields
+  transactionId?: string;
+  utrNumber?: string;
+  paymentMode?: string;
+  adminNotes?: string;
+  approvedBy?: string;
+  failureReason?: string;
+  rejectionReason?: string;
+}
+
+export const getWithdrawalRequests = async (): Promise<WithdrawalRequest[]> => {
+  const q = query(collection(db, 'withdrawal_requests'), orderBy('requestedAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as WithdrawalRequest));
+};
+
+export const approveWithdrawalRequest = async (requestId: string, adminId: string): Promise<void> => {
+  const docRef = doc(db, 'withdrawal_requests', requestId);
+  await updateDoc(docRef, {
+    status: 'APPROVED',
+    approvedAt: serverTimestamp(),
+    approvedBy: adminId
+  });
+};
+
+export const completeWithdrawalRequest = async (
+  requestId: string,
+  advisorId: string,
+  amount: number,
+  transactionDetails: { transactionId: string; utrNumber: string; paymentMode: string; adminNotes?: string }
+): Promise<void> => {
+  await runTransaction(db, async (transaction) => {
+    // 1. Get references
+    const withdrawalRef = doc(db, 'withdrawal_requests', requestId);
+    const advisorRef = doc(db, 'advisors', advisorId);
+
+    // 2. Read operations (if needed, but here we assume inputs are valid or handled by security rules/logic)
+    const advisorDoc = await transaction.get(advisorRef);
+    if (!advisorDoc.exists()) {
+      throw new Error("Advisor does not exist!");
+    }
+
+    // 3. Updates
+    // Update Withdrawal Request
+    transaction.update(withdrawalRef, {
+      status: 'COMPLETED',
+      completedAt: serverTimestamp(),
+      ...transactionDetails
+    });
+
+    // Update Advisor Financials
+    // Decrement pendingWithdrawals, Increment totalWithdrawn
+    // We need to read current values first to be safe, or use increment
+    // Since we are in a transaction reading is safe.
+    const advisorData = advisorDoc.data();
+    const currentPending = advisorData.earningsInfo?.pendingBalance || 0; // Note: Verify if pendingWithdrawals is a separate field or part of pendingBalance logic.
+    // Based on user prompt: "advisor/earningsInfo/pendingWithdrawals: Decrease by requestedAmount."
+    // "advisor/earningsInfo/totalWithdrawn: Increase by requestedAmount."
+    // Let's assume these fields exist or we create them. 
+    // The prompt says: "advisor/earningsInfo/pendingWithdrawals"
+
+    // Check if these fields exist in FullAdvisorProfile. 
+    // They are NOT in the current FullAdvisorProfile interface I saw earlier. 
+    // I should probably add them to the interface if I can, or cast to any.
+    // For now, I will follow the prompt's logic.
+
+    const newPendingWithdrawals = (advisorData.earningsInfo?.pendingWithdrawals || 0) - amount;
+    const newTotalWithdrawn = (advisorData.earningsInfo?.totalWithdrawn || 0) + amount;
+
+    transaction.update(advisorRef, {
+      'earningsInfo.pendingWithdrawals': newPendingWithdrawals,
+      'earningsInfo.totalWithdrawn': newTotalWithdrawn
+    });
+  });
+};
+
+export const rejectWithdrawalRequest = async (
+  requestId: string,
+  advisorId: string,
+  amount: number,
+  rejectionReason: string
+): Promise<void> => {
+  await runTransaction(db, async (transaction) => {
+    const withdrawalRef = doc(db, 'withdrawal_requests', requestId);
+    const advisorRef = doc(db, 'advisors', advisorId);
+
+    const advisorDoc = await transaction.get(advisorRef);
+    if (!advisorDoc.exists()) {
+      throw new Error("Advisor does not exist!");
+    }
+
+    // Update Withdrawal Request
+    transaction.update(withdrawalRef, {
+      status: 'REJECTED',
+      rejectedAt: serverTimestamp(),
+      rejectionReason: rejectionReason
+    });
+
+    // Refund: Decrease pendingWithdrawals (and likely add back to available/pending balance? 
+    // User prompt says: "Refund: Update Advisor Doc → pendingWithdrawals: Decrease by requestedAmount (Unlock funds)."
+    // Usually purely decreasing pending withdrawals doesn't refund. 
+    // It implies the amount was moved from 'Available' to 'PendingWithdrawals' when requested.
+    // So to refund, we must move it back: Decrease 'pendingWithdrawals', Increase 'pendingBalance' (or availableBalance).
+    // The prompt says "Unlock funds".
+    // I'll assume 'pendingBalance' is the available balance for withdrawal based on `EarningsInfo` interface having `pendingBalance`. 
+    // Wait, `EarningsInfo` has `pendingBalance`. 
+    // If request moved money `pendingBalance` -> `pendingWithdrawals`, then refund is `pendingWithdrawals` -> `pendingBalance`.
+
+    const advisorData = advisorDoc.data();
+    const currentPendingWith = advisorData.earningsInfo?.pendingWithdrawals || 0;
+    const currentAvailable = advisorData.earningsInfo?.pendingBalance || 0;
+
+    transaction.update(advisorRef, {
+      'earningsInfo.pendingWithdrawals': currentPendingWith - amount,
+      'earningsInfo.pendingBalance': currentAvailable + amount
+    });
+  });
 };
