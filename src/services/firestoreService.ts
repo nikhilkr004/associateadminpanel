@@ -477,10 +477,10 @@ export interface AdvisorReview {
 export const getAdvisorReviews = async (advisorId: string): Promise<AdvisorReview[]> => {
   try {
     const reviewsRef = collection(db, 'advisors', advisorId, 'reviews');
-    const q = query(reviewsRef, orderBy('createdAt', 'desc'));
+    const q = query(reviewsRef);
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => ({
+
+    const reviews = snapshot.docs.map(doc => ({
       id: doc.id,
       reviewerName: doc.data().reviewerName || doc.data().userName || 'Anonymous',
       reviewerImage: doc.data().reviewerImage || doc.data().userImage,
@@ -489,6 +489,12 @@ export const getAdvisorReviews = async (advisorId: string): Promise<AdvisorRevie
       createdAt: doc.data().createdAt,
       bookingType: doc.data().bookingType || 'general'
     }));
+
+    return reviews.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
   } catch (error) {
     console.error("Error fetching advisor reviews:", error);
     return [];
@@ -516,11 +522,10 @@ export const getAdvisorTransactions = async (advisorId: string): Promise<Advisor
     const instantQuery = query(
       collection(db, 'instant_bookings'),
       where('advisorId', '==', advisorId),
-      orderBy('timestamp', 'desc'),
       firestoreLimit(50)
     );
     const instantSnapshot = await getDocs(instantQuery);
-    
+
     instantSnapshot.forEach(doc => {
       const data = doc.data();
       transactions.push({
@@ -540,11 +545,10 @@ export const getAdvisorTransactions = async (advisorId: string): Promise<Advisor
     const scheduledQuery = query(
       collection(db, 'scheduled_bookings'),
       where('advisorId', '==', advisorId),
-      orderBy('timestamp', 'desc'),
       firestoreLimit(50)
     );
     const scheduledSnapshot = await getDocs(scheduledQuery);
-    
+
     scheduledSnapshot.forEach(doc => {
       const data = doc.data();
       transactions.push({
