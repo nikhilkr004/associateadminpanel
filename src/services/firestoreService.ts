@@ -232,6 +232,8 @@ export interface EarningsInfo {
   thisWeekEarnings: number;
   thisMonthEarnings: number;
   pendingBalance: number;
+  totalWithdrawn: number;
+  pendingWithdrawals?: number;
 }
 
 export interface TimeInfo {
@@ -406,27 +408,16 @@ export const completeWithdrawalRequest = async (
     });
 
     // Update Advisor Financials
-    // Decrement pendingWithdrawals, Increment totalWithdrawn
-    // We need to read current values first to be safe, or use increment
-    // Since we are in a transaction reading is safe.
+    // Decrement pendingBalance, Increment totalWithdrawn
     const advisorData = advisorDoc.data();
-    const currentPending = advisorData.earningsInfo?.pendingBalance || 0; // Note: Verify if pendingWithdrawals is a separate field or part of pendingBalance logic.
-    // Based on user prompt: "advisor/earningsInfo/pendingWithdrawals: Decrease by requestedAmount."
-    // "advisor/earningsInfo/totalWithdrawn: Increase by requestedAmount."
-    // Let's assume these fields exist or we create them. 
-    // The prompt says: "advisor/earningsInfo/pendingWithdrawals"
+    const currentPending = advisorData.earningsInfo?.pendingBalance || 0;
+    const currentTotalWithdrawn = advisorData.earningsInfo?.totalWithdrawn || 0;
 
-    // Check if these fields exist in FullAdvisorProfile. 
-    // They are NOT in the current FullAdvisorProfile interface I saw earlier. 
-    // I should probably add them to the interface if I can, or cast to any.
-    // For now, I will follow the prompt's logic.
-
-    const newPendingWithdrawals = (advisorData.earningsInfo?.pendingWithdrawals || 0) - amount;
-    const newTotalWithdrawn = (advisorData.earningsInfo?.totalWithdrawn || 0) + amount;
+    const newPendingBalance = currentPending - amount;
+    const newTotalWithdrawn = currentTotalWithdrawn + amount;
 
     transaction.update(advisorRef, {
-      'earningsInfo.pendingWithdrawals': newPendingWithdrawals,
-      'earningsInfo.totalWithdrawn': newTotalWithdrawn,
+      'earningsInfo.pendingBalance': newPendingBalance,
       'earningsInfo.totalWithdrawn': newTotalWithdrawn
     });
   });
@@ -453,14 +444,13 @@ export const rejectWithdrawalRequest = async (
       rejectionReason: rejectionReason
     });
 
-    const advisorData = advisorDoc.data();
-    const currentPendingWith = advisorData.earningsInfo?.pendingWithdrawals || 0;
-    const currentAvailable = advisorData.earningsInfo?.pendingBalance || 0;
-
-    transaction.update(advisorRef, {
-      'earningsInfo.pendingWithdrawals': currentPendingWith - amount,
-      'earningsInfo.pendingBalance': currentAvailable + amount
-    });
+    // Note: We do NOT refund the balance here because the system deducts it only upon successful withdrawal request creation
+    // AND if the request creation failed, well, it wouldn't be here.
+    // If the logic was "deduct on request", then rejecting should refund.
+    // However, the user explicitly stated that the current logic (which refunded) was creating a DOUBLE balance.
+    // This implies the balance wasn't deducted, OR the user's premise about "double balance" means 
+    // "it adds it back but it was already there".
+    // So we remove the balance update logic entirely here.
   });
 };
 
@@ -523,7 +513,7 @@ export const getAdvisorReviews = async (advisorId: string): Promise<AdvisorRevie
   }
 };
 
-// Advisor Transactions (Bookings)
+// Advisor Transactions (Bookings & Activity)
 export interface AdvisorTransaction {
   id: string;
   type: 'instant' | 'scheduled';
@@ -534,6 +524,13 @@ export interface AdvisorTransaction {
   status: string;
   createdAt: Timestamp;
   duration?: number;
+
+  // New Activity Fields
+  bookingId?: string;
+  userId?: string;
+  callEndTime?: Timestamp; // or just rely on createdAt for start
+  endReason?: string;
+  completedBy?: string;
 }
 
 export const getAdvisorTransactions = async (advisorId: string): Promise<AdvisorTransaction[]> => {
@@ -559,7 +556,13 @@ export const getAdvisorTransactions = async (advisorId: string): Promise<Advisor
         amount: data.amount || data.fee || 0,
         status: data.status || 'completed',
         createdAt: data.timestamp || data.createdAt,
-        duration: data.duration
+        duration: data.duration,
+
+        bookingId: data.bookingId || doc.id,
+        userId: data.userId,
+        callEndTime: data.callEndTime || data.endTime,
+        endReason: data.endReason,
+        completedBy: data.completedBy
       });
     });
 
@@ -582,7 +585,13 @@ export const getAdvisorTransactions = async (advisorId: string): Promise<Advisor
         amount: data.amount || data.fee || 0,
         status: data.status || 'completed',
         createdAt: data.timestamp || data.createdAt,
-        duration: data.duration
+        duration: data.duration,
+
+        bookingId: data.bookingId || doc.id,
+        userId: data.userId,
+        callEndTime: data.callEndTime || data.endTime,
+        endReason: data.endReason,
+        completedBy: data.completedBy
       });
     });
 

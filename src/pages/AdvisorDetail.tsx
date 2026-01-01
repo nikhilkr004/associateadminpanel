@@ -378,8 +378,10 @@ const AdvisorDetail: React.FC = () => {
                                                 <TableHead>User</TableHead>
                                                 <TableHead>Type</TableHead>
                                                 <TableHead>Service</TableHead>
+                                                <TableHead className="text-center">Duration</TableHead>
                                                 <TableHead>Amount</TableHead>
                                                 <TableHead>Status</TableHead>
+                                                <TableHead>Details</TableHead>
                                                 <TableHead>Date</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -417,6 +419,15 @@ const AdvisorDetail: React.FC = () => {
                                                             <span className="capitalize text-sm">{tx.serviceType}</span>
                                                         </div>
                                                     </TableCell>
+                                                    <TableCell className="text-center">
+                                                        {tx.duration ? (
+                                                            <span className="text-sm font-mono text-muted-foreground">
+                                                                {Math.floor(tx.duration / 60)}m {tx.duration % 60}s
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">-</span>
+                                                        )}
+                                                    </TableCell>
                                                     <TableCell>
                                                         <span className="font-semibold text-green-600">₹{tx.amount}</span>
                                                     </TableCell>
@@ -425,13 +436,27 @@ const AdvisorDetail: React.FC = () => {
                                                             variant="outline"
                                                             className={
                                                                 tx.status === 'completed' ? 'border-green-300 bg-green-50 text-green-700' :
-                                                                tx.status === 'cancelled' ? 'border-red-300 bg-red-50 text-red-700' :
-                                                                tx.status === 'pending' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
-                                                                'border-gray-300 bg-gray-50 text-gray-700'
+                                                                    tx.status === 'cancelled' ? 'border-red-300 bg-red-50 text-red-700' :
+                                                                        tx.status === 'pending' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
+                                                                            'border-gray-300 bg-gray-50 text-gray-700'
                                                             }
                                                         >
                                                             {tx.status}
                                                         </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-col gap-0.5 text-xs">
+                                                            {tx.bookingId && (
+                                                                <span className="text-muted-foreground/60">ID: {tx.bookingId.substring(0, 8)}...</span>
+                                                            )}
+                                                            {tx.completedBy && (
+                                                                <span className="text-muted-foreground">By: {tx.completedBy}</span>
+                                                            )}
+                                                            {tx.endReason && (
+                                                                <span className="max-w-[150px] truncate" title={tx.endReason}>Reas.: {tx.endReason}</span>
+                                                            )}
+                                                            {!tx.bookingId && !tx.completedBy && !tx.endReason && <span className="text-muted-foreground">-</span>}
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell className="text-sm text-muted-foreground">
                                                         {tx.createdAt ? format(tx.createdAt.toDate(), 'MMM dd, yyyy HH:mm') : 'N/A'}
@@ -601,87 +626,55 @@ const AdvisorDetail: React.FC = () => {
                                                 {advisor.availabilityInfo.virtualSchedule.startTime} - {advisor.availabilityInfo.virtualSchedule.endTime}
                                             </span>
                                         </div>
-                                        <div>
-                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Active Days</span>
-                                            <div className="flex flex-wrap gap-1">
-                                                {advisor.availabilityInfo.virtualSchedule.activeDays?.map(day => (
-                                                    <Badge key={day} variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">{day}</Badge>
-                                                )) || <span className="text-sm text-muted-foreground">No days selected</span>}
+                                        <div className="space-y-2">
+                                            <span className="text-sm font-medium text-muted-foreground">Active Days</span>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {advisor.availabilityInfo.virtualSchedule.activeDays && advisor.availabilityInfo.virtualSchedule.activeDays.length > 0
+                                                    ? advisor.availabilityInfo.virtualSchedule.activeDays.map(day => (
+                                                        <Badge key={day} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">{day.substring(0, 3)}</Badge>
+                                                    ))
+                                                    : <span className="text-sm text-muted-foreground">No active days</span>}
                                             </div>
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-2">
-                                            Duration per slot: <span className="font-medium text-foreground">{advisor.availabilityInfo.virtualSchedule.duration} min</span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center py-6 text-muted-foreground">No virtual schedule configured</div>
+                                    <p className="text-muted-foreground italic">No virtual schedule configured.</p>
                                 )}
                             </CardContent>
                         </Card>
 
                         {/* In-Person Schedule */}
-                        <Card className="border-l-4 border-l-green-500">
+                        <Card className="border-l-4 border-l-purple-500">
                             <CardHeader>
-                                <CardTitle className="text-green-700">In-Person Schedule</CardTitle>
+                                <CardTitle className="text-purple-700">In-Person Schedule</CardTitle>
                                 <CardDescription>Availability for physical visits</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {advisor.availabilityInfo?.inPersonSchedule ? (
                                     <>
-                                        <div className="flex justify-between items-center bg-green-50 p-3 rounded-md">
-                                            <span className="flex items-center gap-2 text-sm font-medium text-green-900"><Clock className="h-4 w-4" /> Time Range</span>
-                                            <span className="font-bold text-green-700">
+                                        <div className="flex justify-between items-center bg-purple-50 p-3 rounded-md">
+                                            <span className="flex items-center gap-2 text-sm font-medium text-purple-900"><MapPin className="h-4 w-4" /> Time Range</span>
+                                            <span className="font-bold text-purple-700">
                                                 {advisor.availabilityInfo.inPersonSchedule.startTime} - {advisor.availabilityInfo.inPersonSchedule.endTime}
                                             </span>
                                         </div>
-                                        <div>
-                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Active Days</span>
-                                            <div className="flex flex-wrap gap-1">
-                                                {advisor.availabilityInfo.inPersonSchedule.activeDays?.map(day => (
-                                                    <Badge key={day} variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200">{day}</Badge>
-                                                )) || <span className="text-sm text-muted-foreground">No days selected</span>}
+                                        <div className="space-y-2">
+                                            <span className="text-sm font-medium text-muted-foreground">Active Days</span>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {advisor.availabilityInfo.inPersonSchedule.activeDays && advisor.availabilityInfo.inPersonSchedule.activeDays.length > 0
+                                                    ? advisor.availabilityInfo.inPersonSchedule.activeDays.map(day => (
+                                                        <Badge key={day} variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200 border-none">{day.substring(0, 3)}</Badge>
+                                                    ))
+                                                    : <span className="text-sm text-muted-foreground">No active days</span>}
                                             </div>
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-2">
-                                            Duration per slot: <span className="font-medium text-foreground">{advisor.availabilityInfo.inPersonSchedule.duration} min</span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center py-6 text-muted-foreground">No in-person schedule configured</div>
+                                    <p className="text-muted-foreground italic">No in-person schedule configured.</p>
                                 )}
                             </CardContent>
                         </Card>
                     </div>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Pricing (Per Session/Min)</CardTitle>
-                            <CardDescription>Advisor service rates</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between py-3 border-b">
-                                <span className="text-muted-foreground flex items-center gap-2"><Phone className="h-4 w-4" /> Audio Call</span>
-                                <div className="text-right">
-                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledAudioFee || 0}/session</div>
-                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantAudioFee || 0}/min (Instant)</div>
-                                </div>
-                            </div>
-                            <div className="flex justify-between py-3 border-b">
-                                <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Video Call</span>
-                                <div className="text-right">
-                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledVideoFee || 0}/session</div>
-                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantVideoFee || 0}/min (Instant)</div>
-                                </div>
-                            </div>
-                            <div className="flex justify-between py-3 border-b">
-                                <span className="text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Chat</span>
-                                <div className="text-right">
-                                    <div className="font-medium">₹{advisor.pricingInfo?.scheduledChatFee || 0}/session</div>
-                                    <div className="text-xs text-muted-foreground">₹{advisor.pricingInfo?.instantChatFee || 0}/min (Instant)</div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </TabsContent>
 
                 {/* Documents Tab */}
@@ -756,7 +749,7 @@ const AdvisorDetail: React.FC = () => {
                     </Card>
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 };
 
