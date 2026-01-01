@@ -164,32 +164,32 @@ const AdvisorDetail: React.FC = () => {
                 <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                         <Avatar className="h-24 w-24 border-4 border-background shadow-sm">
-                            <AvatarImage src={advisor.basicInfo.profileImage} />
+                            <AvatarImage src={advisor.basicInfo?.profileImage} />
                             <AvatarFallback className="text-2xl">
-                                {advisor.basicInfo.name?.substring(0, 2).toUpperCase()}
+                                {advisor.basicInfo?.name?.substring(0, 2).toUpperCase() || 'AD'}
                             </AvatarFallback>
                         </Avatar>
 
                         <div className="flex-1 space-y-2">
                             <div className="flex flex-col md:flex-row md:items-center gap-3">
-                                <h1 className="text-3xl font-bold">{advisor.basicInfo.name}</h1>
-                                <Badge variant="outline" className={`${getStatusColor(advisor.basicInfo.status)} capitalize px-3 py-1`}>
-                                    {advisor.basicInfo.status || 'Unknown'}
+                                <h1 className="text-3xl font-bold">{advisor.basicInfo?.name || 'Unknown Advisor'}</h1>
+                                <Badge variant="outline" className={`${getStatusColor(advisor.basicInfo?.status || 'pending')} capitalize px-3 py-1`}>
+                                    {advisor.basicInfo?.status || 'Unknown'}
                                 </Badge>
                             </div>
 
                             <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
                                 <div className="flex items-center gap-1">
                                     <Mail className="h-4 w-4" />
-                                    {advisor.basicInfo.email}
+                                    {advisor.basicInfo?.email || 'No Email'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Phone className="h-4 w-4" />
-                                    {advisor.basicInfo.phoneNumber}
+                                    {advisor.basicInfo?.phoneNumber || 'No Phone'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
-                                    {advisor.basicInfo.city}
+                                    {advisor.basicInfo?.city || 'No City'}
                                 </div>
                             </div>
                         </div>
