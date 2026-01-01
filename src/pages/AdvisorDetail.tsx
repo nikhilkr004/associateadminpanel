@@ -22,7 +22,10 @@ import {
     MessageSquare,
     CreditCard,
     Video,
-    Mic
+    Mic,
+    Activity,
+    Settings,
+    DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -210,6 +213,7 @@ const AdvisorDetail: React.FC = () => {
                     <TabsTrigger value="professional" className="gap-2"><Briefcase className="h-4 w-4" /> Professional</TabsTrigger>
                     <TabsTrigger value="availability" className="gap-2"><Clock className="h-4 w-4" /> Availability</TabsTrigger>
                     <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" /> Documents</TabsTrigger>
+                    <TabsTrigger value="activity" className="gap-2"><Activity className="h-4 w-4" /> Activity & System</TabsTrigger>
                 </TabsList>
 
                 {/* Overview Tab */}
@@ -749,6 +753,120 @@ const AdvisorDetail: React.FC = () => {
                     </Card>
                 </TabsContent>
             </Tabs>
+            {/* Activity & System Tab */}
+            <TabsContent value="activity" className="space-y-6 mt-6">
+                {/* Financial Overview */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                            Detailed Financial Overview
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="p-4 border rounded-lg bg-card">
+                                <span className="text-xs text-muted-foreground uppercase">Today's Earnings</span>
+                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.todayEarnings || 0}</div>
+                            </div>
+                            <div className="p-4 border rounded-lg bg-card">
+                                <span className="text-xs text-muted-foreground uppercase">This Week</span>
+                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.thisWeekEarnings || 0}</div>
+                            </div>
+                            <div className="p-4 border rounded-lg bg-card">
+                                <span className="text-xs text-muted-foreground uppercase">This Month</span>
+                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.thisMonthEarnings || 0}</div>
+                            </div>
+                            <div className="p-4 border rounded-lg bg-muted/30">
+                                <span className="text-xs text-muted-foreground uppercase">Pending Balance</span>
+                                <div className="text-2xl font-bold mt-1 text-primary">₹{advisor.earningsInfo?.pendingBalance || 0}</div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* System Info */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5" />
+                                System & Access Control
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between items-center py-2 border-b">
+                                <span className="text-muted-foreground">User Role</span>
+                                <Badge variant="outline" className="uppercase">{advisor.systemInfo?.userRole || 'Advisor'}</Badge>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b">
+                                <span className="text-muted-foreground">Access Level</span>
+                                <Badge variant="secondary">{advisor.systemInfo?.accessLevel || 'Standard'}</Badge>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b">
+                                <span className="text-muted-foreground">Generate Reports</span>
+                                {advisor.systemInfo?.canGenerateReports ? (
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                ) : (
+                                    <div className="h-5 w-5 rounded-full border border-muted-foreground/30" />
+                                )}
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b">
+                                <span className="text-muted-foreground">Manage Resources</span>
+                                {advisor.systemInfo?.canManageResources ? (
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                ) : (
+                                    <div className="h-5 w-5 rounded-full border border-muted-foreground/30" />
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Contact & Activity Stats */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5" />
+                                Activity & Contact
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between py-2 border-b">
+                                <span className="text-muted-foreground">Response Time</span>
+                                <span className="font-medium">{advisor.contactPreferences?.responseTime || 'N/A'}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
+                                <span className="text-muted-foreground">Preferred Contact</span>
+                                <span className="font-medium capitalize">{advisor.contactPreferences?.preferredContactMethod || 'N/A'}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
+                                <span className="text-muted-foreground">Total Sessions</span>
+                                <span className="font-medium">{transactions?.length || 0}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
+                                <span className="text-muted-foreground">Last Login</span>
+                                <span className="font-medium text-sm">
+                                    {advisor.timeInfo?.lastLogin ? format(advisor.timeInfo.lastLogin.toDate(), 'PP p') : 'Never'}
+                                </span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Timestamps */}
+                <Card className="bg-muted/10">
+                    <CardContent className="p-4 flex flex-wrap gap-6 justify-center text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Joined: {advisor.timeInfo?.createdAt ? format(advisor.timeInfo.createdAt.toDate(), 'PPP') : 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>Updated: {advisor.timeInfo?.updatedAt ? format(advisor.timeInfo.updatedAt.toDate(), 'PPP') : 'N/A'}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
         </div >
     );
 };
