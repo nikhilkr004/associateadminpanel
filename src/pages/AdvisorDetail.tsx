@@ -752,9 +752,9 @@ const AdvisorDetail: React.FC = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-            </Tabs>
-            {/* Activity & System Tab */}
-            <TabsContent value="activity" className="space-y-6 mt-6">
+
+                {/* Activity & System Tab */}
+                <TabsContent value="activity" className="space-y-6 mt-6">
                 {/* Financial Overview */}
                 <Card>
                     <CardHeader>
@@ -866,8 +866,9 @@ const AdvisorDetail: React.FC = () => {
                         </div>
                     </CardContent>
                 </Card>
-            </TabsContent>
-        </div >
+                </TabsContent>
+            </Tabs>
+        </div>
     );
 };
 
