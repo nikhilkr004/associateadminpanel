@@ -279,6 +279,52 @@ const AdvisorDetail: React.FC = () => {
 
                 {/* Reviews Tab */}
                 <TabsContent value="reviews" className="space-y-6 mt-6">
+                    {/* Overall Review Summary */}
+                    <Card className="bg-gradient-to-r from-yellow-50/50 to-orange-50/50 dark:from-yellow-950/20 dark:to-orange-950/20 border-yellow-200/50 dark:border-yellow-800/30">
+                        <CardContent className="p-6">
+                            <div className="flex flex-col md:flex-row items-center gap-6">
+                                <div className="flex flex-col items-center justify-center p-6 bg-background rounded-xl border shadow-sm min-w-[140px]">
+                                    <div className="flex items-center gap-2 text-yellow-500 mb-1">
+                                        <Star className="h-8 w-8 fill-current" />
+                                        <span className="text-4xl font-bold text-foreground">
+                                            {reviews && reviews.length > 0
+                                                ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+                                                : '0.0'}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm text-muted-foreground">out of 5</span>
+                                </div>
+
+                                <div className="flex-1 space-y-2 w-full">
+                                    {[5, 4, 3, 2, 1].map(star => {
+                                        const count = reviews?.filter(r => Math.floor(r.rating) === star).length || 0;
+                                        const percentage = reviews && reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                                        return (
+                                            <div key={star} className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1 w-12 justify-end text-sm text-muted-foreground">
+                                                    <span>{star}</span>
+                                                    <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                                                </div>
+                                                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-500"
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs text-muted-foreground w-8">{count}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="flex flex-col items-center justify-center p-4 bg-background rounded-xl border shadow-sm min-w-[120px]">
+                                    <span className="text-3xl font-bold text-primary">{reviews?.length || 0}</span>
+                                    <span className="text-sm text-muted-foreground">Total Reviews</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
