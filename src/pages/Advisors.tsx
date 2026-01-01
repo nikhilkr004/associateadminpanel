@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdvisors } from '@/hooks/useAdvisors';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ import { Search, UserCheck, Star } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Advisors: React.FC = () => {
+  const navigate = useNavigate();
   const { data: advisors, isLoading, error } = useAdvisors();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -150,7 +152,7 @@ const Advisors: React.FC = () => {
                   <TableRow
                     key={advisor.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => window.location.href = `/dashboard/advisors/${advisor.id}`}
+                    onClick={() => navigate(`/dashboard/advisors/${advisor.id}`)}
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
