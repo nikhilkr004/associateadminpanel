@@ -678,48 +678,70 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
     }
     const profile = { userId: userDoc.id, ...userDoc.data() } as UserProfile;
 
-    // Fetch wallet
-    const walletDoc = await getDoc(doc(db, 'wallets', userId));
-    const wallet = walletDoc.exists()
-      ? { userId: walletDoc.id, ...walletDoc.data() } as WalletData
-      : null;
+    // Fetch wallet with error handling
+    let wallet: WalletData | null = null;
+    try {
+      const walletDoc = await getDoc(doc(db, 'wallets', userId));
+      wallet = walletDoc.exists()
+        ? { userId: walletDoc.id, ...walletDoc.data() } as WalletData
+        : null;
+    } catch (walletError) {
+      console.warn("Error fetching wallet:", walletError);
+      // Continue with null wallet
+    }
 
-    // Fetch transactions
-    const transactionsRef = collection(db, `users/${userId}/transactions`);
-    const transactionsSnapshot = await getDocs(transactionsRef);
-    const transactions = transactionsSnapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }) as UserTransaction)
-      .sort((a, b) => {
-        const timeA = a.timestamp?.toMillis?.() || 0;
-        const timeB = b.timestamp?.toMillis?.() || 0;
-        return timeB - timeA;
-      });
+    // Fetch transactions with error handling
+    let transactions: UserTransaction[] = [];
+    try {
+      const transactionsRef = collection(db, `users/${userId}/transactions`);
+      const transactionsSnapshot = await getDocs(transactionsRef);
+      transactions = transactionsSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }) as UserTransaction)
+        .sort((a, b) => {
+          const timeA = a.timestamp?.toMillis?.() || 0;
+          const timeB = b.timestamp?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+    } catch (transactionsError) {
+      console.warn("Error fetching transactions:", transactionsError);
+      // Continue with empty transactions
+    }
 
-    // Fetch instant bookings
-    // Note: Booking documents use 'studentId' field to reference the user
-    const instantBookingsRef = collection(db, 'instant_bookings');
-    const instantQuery = query(instantBookingsRef, where('studentId', '==', userId));
-    const instantSnapshot = await getDocs(instantQuery);
-    const instantBookings = instantSnapshot.docs
-      .map(doc => ({ bookingId: doc.id, ...doc.data() }) as InstantBooking)
-      .sort((a, b) => {
-        const timeA = a.timestamp?.toMillis?.() || 0;
-        const timeB = b.timestamp?.toMillis?.() || 0;
-        return timeB - timeA;
-      });
+    // Fetch instant bookings with error handling
+    let instantBookings: InstantBooking[] = [];
+    try {
+      const instantBookingsRef = collection(db, 'instant_bookings');
+      const instantQuery = query(instantBookingsRef, where('studentId', '==', userId));
+      const instantSnapshot = await getDocs(instantQuery);
+      instantBookings = instantSnapshot.docs
+        .map(doc => ({ bookingId: doc.id, ...doc.data() }) as InstantBooking)
+        .sort((a, b) => {
+          const timeA = a.timestamp?.toMillis?.() || 0;
+          const timeB = b.timestamp?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+    } catch (instantError) {
+      console.warn("Error fetching instant bookings:", instantError);
+      // Continue with empty instant bookings
+    }
 
-    // Fetch scheduled bookings
-    // Note: Booking documents use 'studentId' field to reference the user
-    const scheduledBookingsRef = collection(db, 'scheduled_bookings');
-    const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId));
-    const scheduledSnapshot = await getDocs(scheduledQuery);
-    const scheduledBookings = scheduledSnapshot.docs
-      .map(doc => ({ bookingId: doc.id, ...doc.data() }) as ScheduledBooking)
-      .sort((a, b) => {
-        const timeA = a.timestamp?.toMillis?.() || 0;
-        const timeB = b.timestamp?.toMillis?.() || 0;
-        return timeB - timeA;
-      });
+    // Fetch scheduled bookings with error handling
+    let scheduledBookings: ScheduledBooking[] = [];
+    try {
+      const scheduledBookingsRef = collection(db, 'scheduled_bookings');
+      const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId));
+      const scheduledSnapshot = await getDocs(scheduledQuery);
+      scheduledBookings = scheduledSnapshot.docs
+        .map(doc => ({ bookingId: doc.id, ...doc.data() }) as ScheduledBooking)
+        .sort((a, b) => {
+          const timeA = a.timestamp?.toMillis?.() || 0;
+          const timeB = b.timestamp?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+    } catch (scheduledError) {
+      console.warn("Error fetching scheduled bookings:", scheduledError);
+      // Continue with empty scheduled bookings
+    }
 
     return { profile, wallet, transactions, instantBookings, scheduledBookings };
   } catch (error) {

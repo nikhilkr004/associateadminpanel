@@ -15,13 +15,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  ArrowLeft, 
-  User, 
-  Wallet, 
-  Calendar, 
-  Phone, 
-  Mail, 
+import {
+  ArrowLeft,
+  User,
+  Wallet,
+  Calendar,
+  Phone,
+  Mail,
   MapPin,
   TrendingUp,
   TrendingDown,
@@ -103,7 +103,7 @@ const UserDetail: React.FC = () => {
   if (!data) return null;
 
   const { profile, wallet, transactions, instantBookings, scheduledBookings } = data;
-  const totalBookings = instantBookings.length + scheduledBookings.length;
+  const totalBookings = (instantBookings?.length || 0) + (scheduledBookings?.length || 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -117,7 +117,7 @@ const UserDetail: React.FC = () => {
             <User className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{profile.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{profile?.name || 'Unknown User'}</h1>
             <p className="text-muted-foreground text-sm">User Details</p>
           </div>
         </div>
@@ -133,22 +133,22 @@ const UserDetail: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="flex justify-center">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={profile.profilePhotoUrl} alt={profile.name} />
+                <AvatarImage src={profile?.profilePhotoUrl} alt={profile?.name || 'User'} />
                 <AvatarFallback className="text-2xl">
-                  {profile.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  {profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
             </div>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>{profile.email}</span>
+                <span>{profile?.email || 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>{profile.phone}</span>
+                <span>{profile?.phone || 'N/A'}</span>
               </div>
-              {profile.city && (
+              {profile?.city && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
                   <span>{profile.city}</span>
@@ -156,9 +156,9 @@ const UserDetail: React.FC = () => {
               )}
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Joined: {profile.jointAt}</span>
+                <span>Joined: {profile?.jointAt || 'N/A'}</span>
               </div>
-              {profile.gender && (
+              {profile?.gender && (
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{profile.gender}</Badge>
                 </div>
@@ -176,12 +176,12 @@ const UserDetail: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-primary/5 rounded-lg text-center">
                 <Wallet className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <p className="text-2xl font-bold">{wallet ? formatCurrency(wallet.balance) : '₹0'}</p>
+                <p className="text-2xl font-bold">{wallet ? formatCurrency(wallet.balance || 0) : '₹0.00'}</p>
                 <p className="text-xs text-muted-foreground">Wallet Balance</p>
               </div>
               <div className="p-4 bg-orange-50 rounded-lg text-center">
                 <TrendingDown className="h-6 w-6 mx-auto mb-2 text-orange-500" />
-                <p className="text-2xl font-bold">{wallet ? formatCurrency(wallet.totalSpent) : '₹0'}</p>
+                <p className="text-2xl font-bold">{wallet ? formatCurrency(wallet.totalSpent || 0) : '₹0.00'}</p>
                 <p className="text-xs text-muted-foreground">Total Spent</p>
               </div>
               <div className="p-4 bg-blue-50 rounded-lg text-center">
@@ -191,7 +191,7 @@ const UserDetail: React.FC = () => {
               </div>
               <div className="p-4 bg-green-50 rounded-lg text-center">
                 <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                <p className="text-2xl font-bold">{transactions.length}</p>
+                <p className="text-2xl font-bold">{transactions?.length || 0}</p>
                 <p className="text-xs text-muted-foreground">Transactions</p>
               </div>
             </div>
