@@ -696,9 +696,9 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
       });
 
     // Fetch instant bookings
-    // Note: Using 'userId' as per pattern in getAdvisorTransactions
+    // Note: Booking documents use 'studentId' field to reference the user
     const instantBookingsRef = collection(db, 'instant_bookings');
-    const instantQuery = query(instantBookingsRef, where('userId', '==', userId));
+    const instantQuery = query(instantBookingsRef, where('studentId', '==', userId));
     const instantSnapshot = await getDocs(instantQuery);
     const instantBookings = instantSnapshot.docs
       .map(doc => ({ bookingId: doc.id, ...doc.data() }) as InstantBooking)
@@ -709,9 +709,9 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
       });
 
     // Fetch scheduled bookings
-    // Note: Using 'userId' as per pattern in getAdvisorTransactions
+    // Note: Booking documents use 'studentId' field to reference the user
     const scheduledBookingsRef = collection(db, 'scheduled_bookings');
-    const scheduledQuery = query(scheduledBookingsRef, where('userId', '==', userId));
+    const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId));
     const scheduledSnapshot = await getDocs(scheduledQuery);
     const scheduledBookings = scheduledSnapshot.docs
       .map(doc => ({ bookingId: doc.id, ...doc.data() }) as ScheduledBooking)
