@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '@/services/firebase';
-import { collection, query, where, Timestamp, onSnapshot } from 'firebase/firestore';
+import { collection, Timestamp, onSnapshot } from 'firebase/firestore';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -8,6 +8,10 @@ export interface DashboardStats {
   totalBookings: number;
   pendingAdvisors: number;
   todayBookings: number;
+  totalRevenue: number;
+  todayRevenue: number;
+  activeBookings: number;
+  totalWalletBalance: number;
 }
 
 export const useDashboardStats = () => {
@@ -18,20 +22,22 @@ export const useDashboardStats = () => {
   useEffect(() => {
     setIsLoading(true);
 
-    // Listeners array to track all unsubscribes
     const unsubscribes: (() => void)[] = [];
 
-    // Stats object that gets updated by each listener
     const stats: DashboardStats = {
       totalUsers: 0,
       totalAdvisors: 0,
       totalBookings: 0,
       pendingAdvisors: 0,
       todayBookings: 0,
+      totalRevenue: 0,
+      todayRevenue: 0,
+      activeBookings: 0,
+      totalWalletBalance: 0,
     };
 
     let listenersReady = 0;
-    const totalListeners = 5;
+    const totalListeners = 6;
 
     const checkAllReady = () => {
       listenersReady++;
@@ -43,6 +49,10 @@ export const useDashboardStats = () => {
     const updateStats = () => {
       setData({ ...stats });
     };
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const startTimestamp = Timestamp.fromDate(startOfDay);
 
     try {
       // 1. Users listener
@@ -61,19 +71,30 @@ export const useDashboardStats = () => {
       );
       unsubscribes.push(usersUnsubscribe);
 
-      // 2. Advisors listener (also counts pending)
+      // 2. Advisors listener (counts pending and calculates revenue)
       const advisorsUnsubscribe = onSnapshot(
         collection(db, 'advisors'),
         (snapshot) => {
           stats.totalAdvisors = snapshot.size;
           let pending = 0;
+          let totalRevenue = 0;
+          let todayRevenue = 0;
+          
           snapshot.forEach((doc) => {
             const data = doc.data();
             if (data.basicInfo?.status === 'pending') {
               pending++;
             }
+            // Calculate total revenue from advisor earnings
+            if (data.earningsInfo) {
+              totalRevenue += data.earningsInfo.totalLifetimeEarnings || 0;
+              todayRevenue += data.earningsInfo.todayEarnings || 0;
+            }
           });
+          
           stats.pendingAdvisors = pending;
+          stats.totalRevenue = totalRevenue;
+          stats.todayRevenue = todayRevenue;
           updateStats();
           checkAllReady();
         },
@@ -90,24 +111,29 @@ export const useDashboardStats = () => {
       let scheduledBookingsCount = 0;
       let todayInstantCount = 0;
       let todayScheduledCount = 0;
-
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const startTimestamp = Timestamp.fromDate(startOfDay);
+      let activeInstantCount = 0;
+      let activeScheduledCount = 0;
 
       const instantBookingsUnsubscribe = onSnapshot(
         collection(db, 'instant_bookings'),
         (snapshot) => {
           instantBookingsCount = snapshot.size;
           todayInstantCount = 0;
+          activeInstantCount = 0;
+          
           snapshot.forEach((doc) => {
             const data = doc.data();
             if (data.timestamp && data.timestamp.toMillis() >= startTimestamp.toMillis()) {
               todayInstantCount++;
             }
+            if (data.status === 'ongoing' || data.status === 'accepted') {
+              activeInstantCount++;
+            }
           });
+          
           stats.totalBookings = instantBookingsCount + scheduledBookingsCount;
           stats.todayBookings = todayInstantCount + todayScheduledCount;
+          stats.activeBookings = activeInstantCount + activeScheduledCount;
           updateStats();
           checkAllReady();
         },
@@ -125,14 +151,21 @@ export const useDashboardStats = () => {
         (snapshot) => {
           scheduledBookingsCount = snapshot.size;
           todayScheduledCount = 0;
+          activeScheduledCount = 0;
+          
           snapshot.forEach((doc) => {
             const data = doc.data();
             if (data.timestamp && data.timestamp.toMillis() >= startTimestamp.toMillis()) {
               todayScheduledCount++;
             }
+            if (data.status === 'ongoing' || data.status === 'accepted') {
+              activeScheduledCount++;
+            }
           });
+          
           stats.totalBookings = instantBookingsCount + scheduledBookingsCount;
           stats.todayBookings = todayInstantCount + todayScheduledCount;
+          stats.activeBookings = activeInstantCount + activeScheduledCount;
           updateStats();
           checkAllReady();
         },
@@ -144,11 +177,30 @@ export const useDashboardStats = () => {
       );
       unsubscribes.push(scheduledBookingsUnsubscribe);
 
-      // 5. Support tickets listener (for complaints count - used in table)
+      // 5. Wallets listener (total user wallet balance)
+      const walletsUnsubscribe = onSnapshot(
+        collection(db, 'wallets'),
+        (snapshot) => {
+          let totalBalance = 0;
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            totalBalance += data.balance || 0;
+          });
+          stats.totalWalletBalance = totalBalance;
+          updateStats();
+          checkAllReady();
+        },
+        (err) => {
+          console.error('Wallets listener error:', err);
+          checkAllReady();
+        }
+      );
+      unsubscribes.push(walletsUnsubscribe);
+
+      // 6. Support tickets listener
       const ticketsUnsubscribe = onSnapshot(
         collection(db, 'support_tickets'),
-        (snapshot) => {
-          // This just triggers a checkAllReady - complaints are handled separately
+        () => {
           checkAllReady();
         },
         (err) => {
@@ -164,7 +216,6 @@ export const useDashboardStats = () => {
       setIsLoading(false);
     }
 
-    // Cleanup function
     return () => {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
