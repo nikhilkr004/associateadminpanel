@@ -363,59 +363,56 @@ const UserDetail: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </CardContent>
-    </Card>
-        </TabsContent >
 
-  <TabsContent value="transactions">
-    <Card>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No transactions found
-                </TableCell>
-              </TableRow>
-            ) : (
-              transactions.map((tx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {tx.type === 'CREDIT' ? (
-                        <TrendingUp className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-500" />
-                      )}
-                      <span>{tx.type}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={tx.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
-                    {tx.type === 'CREDIT' ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </TableCell>
-                  <TableCell>{tx.description}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(tx.status)}>{tx.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(tx.timestamp)}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  </TabsContent>
+        <TabsContent value="transactions">
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No transactions found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    transactions.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {tx.type === 'CREDIT' ? (
+                              <TrendingUp className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <TrendingDown className="h-4 w-4 text-red-500" />
+                            )}
+                            <span>{tx.type}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className={tx.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
+                          {tx.type === 'CREDIT' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </TableCell>
+                        <TableCell>{tx.description}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(tx.status)}>{tx.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(tx.timestamp)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs >
     </div >
   );
