@@ -638,27 +638,77 @@ export interface UserTransaction {
 }
 
 export interface InstantBooking {
+  // Identity Fields
   bookingId: string;
+  studentId: string;
   advisorId: string;
+  studentName?: string;
   advisorName?: string;
+
+  // Booking Details
   bookingType: 'AUDIO' | 'VIDEO' | 'CHAT';
-  rate: number;
-  status: string;
+  purpose?: string;
   urgencyLevel?: string;
-  timestamp: any;
-  duration?: number;
+  preferredLanguage?: string;
+  additionalNotes?: string;
+
+  // Pricing
+  sessionAmount?: number;
+  ratePerMinute?: number;
+
+  // Status Fields
+  bookingStatus?: string;
+  paymentStatus?: string;
+
+  // Timestamps
+  bookingTimestamp?: any;
+  timestamp?: any; // Keep for backward compatibility
+  advisorResponseDeadline?: any;
+  advisorCalledAt?: any;
+  updatedAt?: any;
+
+  // Payment Result (Added after call ends)
+  totalPrice?: number;
+  actualDuration?: number;
+  duration?: number; // Keep for backward compatibility
+  failureReason?: string;
 }
 
 export interface ScheduledBooking {
+  // Identity Fields
   bookingId: string;
+  studentId: string;
   advisorId: string;
+  studentName?: string;
   advisorName?: string;
+
+  // Booking Details
   bookingType: 'AUDIO' | 'VIDEO' | 'CHAT';
-  bookingSlot: string;
-  bookingDate: string;
-  sessionAmount: number;
-  status: string;
-  timestamp: any;
+  purpose?: string;
+  urgencyLevel?: string;
+  preferredLanguage?: string;
+  additionalNotes?: string;
+
+  // Schedule Details
+  bookingDate?: string;
+  bookingSlot?: string;
+
+  // Pricing
+  sessionAmount?: number;
+
+  // Status Fields
+  bookingStatus?: string;
+  paymentStatus?: string;
+
+  // Timestamps
+  bookingTimestamp?: any;
+  timestamp?: any; // Keep for backward compatibility
+  advisorResponseDeadline?: any;
+  updatedAt?: any;
+
+  // Payment Result (Updated after call ends)
+  actualDuration?: number;
+  failureReason?: string;
 }
 
 export interface UserDetailData {

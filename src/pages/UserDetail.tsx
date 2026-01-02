@@ -213,35 +213,72 @@ const UserDetail: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Booking ID</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Rate</TableHead>
+                    <TableHead>Purpose</TableHead>
+                    <TableHead>Urgency</TableHead>
+                    <TableHead>Rate/Min</TableHead>
                     <TableHead>Duration</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Booking Status</TableHead>
+                    <TableHead>Payment</TableHead>
                     <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {instantBookings.length === 0 ? (
+                  {instantBookings?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                         No instant bookings found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    instantBookings.map((booking) => (
+                    instantBookings?.map((booking) => (
                       <TableRow key={booking.bookingId}>
+                        <TableCell className="font-mono text-xs">{booking.bookingId}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getBookingTypeIcon(booking.bookingType)}
                             <span>{booking.bookingType}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{formatCurrency(booking.rate)}/min</TableCell>
-                        <TableCell>{booking.duration ? `${booking.duration}s` : '-'}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                        <TableCell className="max-w-[200px] truncate" title={booking.purpose}>
+                          {booking.purpose || '-'}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(booking.timestamp)}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{booking.urgencyLevel || 'Medium'}</Badge>
+                        </TableCell>
+                        <TableCell>{booking.ratePerMinute ? formatCurrency(booking.ratePerMinute) : '-'}/min</TableCell>
+                        <TableCell>
+                          {booking.actualDuration
+                            ? `${Math.floor(booking.actualDuration / 60)}m ${booking.actualDuration % 60}s`
+                            : booking.duration
+                              ? `${booking.duration}s`
+                              : '-'}
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {booking.totalPrice
+                            ? formatCurrency(booking.totalPrice)
+                            : booking.sessionAmount
+                              ? formatCurrency(booking.sessionAmount)
+                              : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(booking.bookingStatus || 'pending')}>
+                            {booking.bookingStatus || 'pending'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={booking.paymentStatus === 'paid' ? 'default' : 'secondary'}
+                            className={booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                          >
+                            {booking.paymentStatus || 'pending'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(booking.bookingTimestamp || booking.timestamp)}
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -257,85 +294,67 @@ const UserDetail: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Booking ID</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Slot</TableHead>
+                    <TableHead>Purpose</TableHead>
+                    <TableHead>Date & Slot</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Booking Status</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {scheduledBookings.length === 0 ? (
+                  {scheduledBookings?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                         No scheduled bookings found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    scheduledBookings.map((booking) => (
+                    scheduledBookings?.map((booking) => (
                       <TableRow key={booking.bookingId}>
+                        <TableCell className="font-mono text-xs">{booking.bookingId}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getBookingTypeIcon(booking.bookingType)}
                             <span>{booking.bookingType}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{booking.bookingDate}</TableCell>
-                        <TableCell>{booking.bookingSlot}</TableCell>
-                        <TableCell>{formatCurrency(booking.sessionAmount)}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                        <TableCell className="max-w-[200px] truncate" title={booking.purpose}>
+                          {booking.purpose || '-'}
                         </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        No transactions found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    transactions.map((tx) => (
-                      <TableRow key={tx.id}>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            {tx.type === 'CREDIT' ? (
-                              <TrendingUp className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <TrendingDown className="h-4 w-4 text-red-500" />
-                            )}
-                            <span>{tx.type}</span>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-medium">{booking.bookingDate || '-'}</span>
+                            <span className="text-xs text-muted-foreground">{booking.bookingSlot || '-'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className={tx.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
-                          {tx.type === 'CREDIT' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        <TableCell className="font-semibold">
+                          {booking.sessionAmount ? formatCurrency(booking.sessionAmount) : '-'}
                         </TableCell>
-                        <TableCell>{tx.description}</TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(tx.status)}>{tx.status}</Badge>
+                          {booking.actualDuration
+                            ? `${Math.floor(booking.actualDuration / 60)}m ${booking.actualDuration % 60}s`
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(tx.timestamp)}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(booking.bookingStatus || 'pending')}>
+                            {booking.bookingStatus || 'pending'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="default"
+                            className="bg-green-100 text-green-800"
+                          >
+                            {booking.paymentStatus || 'paid'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(booking.bookingTimestamp || booking.timestamp)}
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -344,8 +363,61 @@ const UserDetail: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
+      </CardContent>
+    </Card>
+        </TabsContent >
+
+  <TabsContent value="transactions">
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  No transactions found
+                </TableCell>
+              </TableRow>
+            ) : (
+              transactions.map((tx) => (
+                <TableRow key={tx.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {tx.type === 'CREDIT' ? (
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <TrendingDown className="h-4 w-4 text-red-500" />
+                      )}
+                      <span>{tx.type}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className={tx.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
+                    {tx.type === 'CREDIT' ? '+' : '-'}{formatCurrency(tx.amount)}
+                  </TableCell>
+                  <TableCell>{tx.description}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(tx.status)}>{tx.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{formatDate(tx.timestamp)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  </TabsContent>
+      </Tabs >
+    </div >
   );
 };
 
