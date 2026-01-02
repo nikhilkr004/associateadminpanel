@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+import UserDetail from "./pages/UserDetail";
 import Advisors from "./pages/Advisors";
 import AdvisorDetail from "./pages/AdvisorDetail";
 import Withdrawals from "./pages/Withdrawals";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="services" element={<Dashboard />} />
               <Route path="samples" element={<Dashboard />} />
               <Route path="users" element={<Users />} />
+              <Route path="users/:userId" element={<UserDetail />} />
               <Route path="advisors" element={<Advisors />} />
               <Route path="advisors/:advisorId" element={<AdvisorDetail />} />
               <Route path="bookings" element={<Dashboard />} />

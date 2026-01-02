@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUsers } from '@/hooks/useUsers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import { Search, Users as UsersIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Users: React.FC = () => {
+  const navigate = useNavigate();
   const { data: users, isLoading, error } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -102,7 +104,11 @@ const Users: React.FC = () => {
                 </TableRow>
               ) : (
                 filteredUsers.map((user) => (
-                  <TableRow key={user.userId}>
+                  <TableRow 
+                    key={user.userId} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/dashboard/users/${user.userId}`)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
