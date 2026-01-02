@@ -762,7 +762,9 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
     try {
       const instantBookingsRef = collection(db, 'instant_bookings');
       const instantQuery = query(instantBookingsRef, where('studentId', '==', userId));
+      console.log('🔍 Fetching instant bookings for userId:', userId);
       const instantSnapshot = await getDocs(instantQuery);
+      console.log('📊 Instant bookings found:', instantSnapshot.size);
       instantBookings = instantSnapshot.docs
         .map(doc => ({ bookingId: doc.id, ...doc.data() }) as InstantBooking)
         .sort((a, b) => {
@@ -771,7 +773,7 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
           return timeB - timeA;
         });
     } catch (instantError) {
-      console.warn("Error fetching instant bookings:", instantError);
+      console.error("❌ Error fetching instant bookings:", instantError);
       // Continue with empty instant bookings
     }
 
@@ -780,7 +782,9 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
     try {
       const scheduledBookingsRef = collection(db, 'scheduled_bookings');
       const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId));
+      console.log('🔍 Fetching scheduled bookings for userId:', userId);
       const scheduledSnapshot = await getDocs(scheduledQuery);
+      console.log('📊 Scheduled bookings found:', scheduledSnapshot.size);
       scheduledBookings = scheduledSnapshot.docs
         .map(doc => ({ bookingId: doc.id, ...doc.data() }) as ScheduledBooking)
         .sort((a, b) => {
@@ -789,7 +793,7 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
           return timeB - timeA;
         });
     } catch (scheduledError) {
-      console.warn("Error fetching scheduled bookings:", scheduledError);
+      console.error("❌ Error fetching scheduled bookings:", scheduledError);
       // Continue with empty scheduled bookings
     }
 
