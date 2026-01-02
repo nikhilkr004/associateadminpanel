@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 
 export interface UserProfile {
@@ -80,30 +80,38 @@ const fetchUserDetail = async (userId: string): Promise<UserDetailData> => {
 
   // Fetch transactions
   const transactionsRef = collection(db, `users/${userId}/transactions`);
-  const transactionsQuery = query(transactionsRef, orderBy('timestamp', 'desc'));
-  const transactionsSnapshot = await getDocs(transactionsQuery);
-  const transactions = transactionsSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as UserTransaction[];
+  const transactionsSnapshot = await getDocs(transactionsRef);
+  const transactions = transactionsSnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }) as UserTransaction)
+    .sort((a, b) => {
+      const timeA = a.timestamp?.toMillis?.() || 0;
+      const timeB = b.timestamp?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
 
   // Fetch instant bookings
   const instantBookingsRef = collection(db, 'instant_bookings');
-  const instantQuery = query(instantBookingsRef, where('studentId', '==', userId), orderBy('timestamp', 'desc'));
+  const instantQuery = query(instantBookingsRef, where('studentId', '==', userId));
   const instantSnapshot = await getDocs(instantQuery);
-  const instantBookings = instantSnapshot.docs.map(doc => ({
-    bookingId: doc.id,
-    ...doc.data()
-  })) as InstantBooking[];
+  const instantBookings = instantSnapshot.docs
+    .map(doc => ({ bookingId: doc.id, ...doc.data() }) as InstantBooking)
+    .sort((a, b) => {
+      const timeA = a.timestamp?.toMillis?.() || 0;
+      const timeB = b.timestamp?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
 
   // Fetch scheduled bookings
   const scheduledBookingsRef = collection(db, 'scheduled_bookings');
-  const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId), orderBy('timestamp', 'desc'));
+  const scheduledQuery = query(scheduledBookingsRef, where('studentId', '==', userId));
   const scheduledSnapshot = await getDocs(scheduledQuery);
-  const scheduledBookings = scheduledSnapshot.docs.map(doc => ({
-    bookingId: doc.id,
-    ...doc.data()
-  })) as ScheduledBooking[];
+  const scheduledBookings = scheduledSnapshot.docs
+    .map(doc => ({ bookingId: doc.id, ...doc.data() }) as ScheduledBooking)
+    .sort((a, b) => {
+      const timeA = a.timestamp?.toMillis?.() || 0;
+      const timeB = b.timestamp?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
 
   return { profile, wallet, transactions, instantBookings, scheduledBookings };
 };
