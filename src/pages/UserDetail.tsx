@@ -202,9 +202,9 @@ const UserDetail: React.FC = () => {
       {/* Tabs for Bookings & Transactions */}
       <Tabs defaultValue="instant" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="instant">Instant Bookings ({instantBookings.length})</TabsTrigger>
-          <TabsTrigger value="scheduled">Scheduled ({scheduledBookings.length})</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions ({transactions.length})</TabsTrigger>
+          <TabsTrigger value="instant">Instant Bookings ({instantBookings?.length || 0})</TabsTrigger>
+          <TabsTrigger value="scheduled">Scheduled ({scheduledBookings?.length || 0})</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions ({transactions?.length || 0})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="instant">
@@ -378,14 +378,14 @@ const UserDetail: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.length === 0 ? (
+                  {!transactions?.length ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         No transactions found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    transactions.map((tx) => (
+                    transactions?.map((tx) => (
                       <TableRow key={tx.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
