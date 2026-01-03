@@ -4,16 +4,10 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
-  List,
-  Settings,
   Users,
-  Calendar,
   ClipboardList,
-  Package,
   UserCheck,
-  CalendarDays,
   LogOut,
-  Scissors,
   X,
   MessageSquareWarning
 } from 'lucide-react';
@@ -31,24 +25,6 @@ const menuItems = [
   },
 ];
 
-const serviceMenuItems = [
-  {
-    label: 'Service Categories',
-    icon: List,
-    path: '/dashboard/categories',
-  },
-  {
-    label: 'Services',
-    icon: Settings,
-    path: '/dashboard/services',
-  },
-  {
-    label: 'Samples',
-    icon: Package,
-    path: '/dashboard/samples',
-  },
-];
-
 const clientMenuItems = [
   {
     label: 'Users',
@@ -59,11 +35,6 @@ const clientMenuItems = [
     label: 'Advisors',
     icon: UserCheck,
     path: '/dashboard/advisors',
-  },
-  {
-    label: 'Bookings',
-    icon: CalendarDays,
-    path: '/dashboard/bookings',
   },
   {
     label: 'Withdrawals',
@@ -144,17 +115,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             {menuItems.map((item) => (
               <NavItem key={item.path} item={item} />
             ))}
-          </div>
-
-          <div>
-            <p className="px-4 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Service & Samples
-            </p>
-            <div className="space-y-1">
-              {serviceMenuItems.map((item) => (
-                <NavItem key={item.path} item={item} />
-              ))}
-            </div>
           </div>
 
           <div>
