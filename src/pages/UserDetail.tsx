@@ -100,9 +100,23 @@ const UserDetail: React.FC = () => {
     );
   }
 
-  if (!data) return null;
+  if (!data || !data.profile) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/users')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">User Not Found</h1>
+            <p className="text-muted-foreground text-sm">The user you're looking for doesn't exist.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const { profile, wallet, transactions, instantBookings, scheduledBookings } = data;
+  const { profile, wallet, transactions = [], instantBookings = [], scheduledBookings = [] } = data;
   const totalBookings = (instantBookings?.length || 0) + (scheduledBookings?.length || 0);
 
   return (
