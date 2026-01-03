@@ -112,6 +112,8 @@ const AdvisorDetail: React.FC = () => {
         );
     }
 
+    const formatCurrency = (amount?: number) => `₹${(amount || 0).toFixed(2)}`;
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'active': return 'bg-green-100 text-green-700 border-green-200';
@@ -231,7 +233,7 @@ const AdvisorDetail: React.FC = () => {
                                     </div>
                                     <div className="p-4 bg-green-500/5 rounded-lg text-center">
                                         <div className="text-2xl font-bold text-green-600">
-                                            {advisor.earningsInfo?.totalLifetimeEarnings ? `₹${advisor.earningsInfo.totalLifetimeEarnings}` : '₹0'}
+                                            {formatCurrency(advisor.earningsInfo?.totalLifetimeEarnings)}
                                         </div>
                                         <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Lifetime Earnings</div>
                                     </div>
@@ -813,19 +815,19 @@ const AdvisorDetail: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="p-4 border rounded-lg bg-card">
                                 <span className="text-xs text-muted-foreground uppercase">Today's Earnings</span>
-                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.todayEarnings || 0}</div>
+                                <div className="text-2xl font-bold mt-1">{formatCurrency(advisor.earningsInfo?.todayEarnings)}</div>
                             </div>
                             <div className="p-4 border rounded-lg bg-card">
                                 <span className="text-xs text-muted-foreground uppercase">This Week</span>
-                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.thisWeekEarnings || 0}</div>
+                                <div className="text-2xl font-bold mt-1">{formatCurrency(advisor.earningsInfo?.thisWeekEarnings)}</div>
                             </div>
                             <div className="p-4 border rounded-lg bg-card">
                                 <span className="text-xs text-muted-foreground uppercase">This Month</span>
-                                <div className="text-2xl font-bold mt-1">₹{advisor.earningsInfo?.thisMonthEarnings || 0}</div>
+                                <div className="text-2xl font-bold mt-1">{formatCurrency(advisor.earningsInfo?.thisMonthEarnings)}</div>
                             </div>
                             <div className="p-4 border rounded-lg bg-muted/30">
                                 <span className="text-xs text-muted-foreground uppercase">Pending Balance</span>
-                                <div className="text-2xl font-bold mt-1 text-primary">₹{advisor.earningsInfo?.pendingBalance || 0}</div>
+                                <div className="text-2xl font-bold mt-1 text-primary">{formatCurrency(advisor.earningsInfo?.pendingBalance)}</div>
                             </div>
                         </div>
                     </CardContent>
