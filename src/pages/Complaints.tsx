@@ -86,52 +86,47 @@ const Complaints: React.FC = () => {
     }, [tickets]);
 
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <MessageSquareWarning className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-foreground">Support Tickets</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Manage and respond to advisor complaints
-                        </p>
-                    </div>
+                <div>
+                    <h1 className="text-2xl font-semibold text-foreground tracking-tight">Complaints</h1>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Manage and respond to support tickets
+                    </p>
                 </div>
             </div>
 
             {/* Status Tabs */}
             <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
-                <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
-                    <TabsTrigger value="all" className="gap-2">
+                <TabsList className="bg-muted/30 p-1 h-auto flex-wrap">
+                    <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         All
-                        <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 text-xs bg-muted rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs bg-muted/50 rounded-full">
                             {statusCounts.all}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="open" className="gap-2">
+                    <TabsTrigger value="open" className="gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         Open
-                        <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 text-xs bg-orange-100 text-orange-700 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs bg-orange-100 text-orange-700 rounded-full">
                             {statusCounts.open}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="in_progress" className="gap-2">
+                    <TabsTrigger value="in_progress" className="gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         In Progress
-                        <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs bg-blue-100 text-blue-700 rounded-full">
                             {statusCounts.in_progress}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="resolved" className="gap-2">
+                    <TabsTrigger value="resolved" className="gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         Resolved
-                        <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 text-xs bg-green-100 text-green-700 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs bg-green-100 text-green-700 rounded-full">
                             {statusCounts.resolved}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="closed" className="gap-2">
+                    <TabsTrigger value="closed" className="gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         Closed
-                        <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 text-xs bg-gray-100 text-gray-700 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs bg-gray-100 text-gray-700 rounded-full">
                             {statusCounts.closed}
                         </span>
                     </TabsTrigger>
@@ -147,13 +142,13 @@ const Complaints: React.FC = () => {
                         placeholder="Search by ticket ID, name, or email..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-card border-border/50"
                     />
                 </div>
 
                 {/* Priority Filter */}
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-card border-border/50">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4" />
                             <SelectValue placeholder="Priority" />
@@ -169,7 +164,7 @@ const Complaints: React.FC = () => {
 
                 {/* Category Filter */}
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-card border-border/50">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4" />
                             <SelectValue placeholder="Category" />

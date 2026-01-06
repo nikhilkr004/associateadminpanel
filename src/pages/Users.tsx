@@ -40,43 +40,38 @@ const Users: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <UsersIcon className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Users</h1>
-            <p className="text-muted-foreground text-sm">
-              {isLoading ? 'Loading...' : `${users?.length || 0} total users`}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">Users</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {isLoading ? 'Loading...' : `${users?.length || 0} total users`}
+          </p>
         </div>
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search users..."
+            placeholder="Search by name, email, or city..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-card border-border/50"
           />
         </div>
       </div>
 
       {/* Table */}
-      <Card>
+      <Card className="border-border/40 rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Gender</TableHead>
-                <TableHead>Joined</TableHead>
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">User</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">City</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gender</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Joined</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
