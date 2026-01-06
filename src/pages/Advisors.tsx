@@ -67,33 +67,28 @@ const Advisors: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <UserCheck className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Advisors</h1>
-            <p className="text-muted-foreground text-sm">
-              {isLoading ? 'Loading...' : `${advisors?.length || 0} total advisors`}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">Advisors</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {isLoading ? 'Loading...' : `${advisors?.length || 0} total advisors`}
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-72">
+          <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search advisors..."
+              placeholder="Search by name, email, or department..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-card border-border/50"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filter by status" />
+            <SelectTrigger className="w-full sm:w-36 bg-card border-border/50">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
@@ -106,17 +101,17 @@ const Advisors: React.FC = () => {
       </div>
 
       {/* Table */}
-      <Card>
+      <Card className="border-border/40 rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Advisor</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Experience</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Active</TableHead>
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Advisor</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Department</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Experience</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rating</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

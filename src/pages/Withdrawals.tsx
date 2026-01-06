@@ -263,43 +263,38 @@ const Withdrawals: React.FC = () => {
     if (isLoading) return <div className="p-10 text-center">Loading withdrawals...</div>;
 
     return (
-        <div className="space-y-6 animate-fade-in p-6">
+        <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <IndianRupee className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-foreground">Withdrawal Requests</h1>
-                        <p className="text-muted-foreground text-sm">Manage advisor payouts and financial requests</p>
-                    </div>
+                <div>
+                    <h1 className="text-2xl font-semibold text-foreground tracking-tight">Withdrawals</h1>
+                    <p className="text-muted-foreground text-sm mt-1">Manage advisor payouts and financial requests</p>
                 </div>
-                <div className="relative w-full sm:w-72">
+                <div className="relative w-full sm:w-80">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search by name or email..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-card border-border/50"
                     />
                 </div>
             </div>
 
             <Tabs defaultValue="pending" className="w-full">
-                <TabsList className="mb-4">
-                    <TabsTrigger value="pending" className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" /> Pending Review
+                <TabsList className="mb-4 bg-muted/30 p-1">
+                    <TabsTrigger value="pending" className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
+                        <Clock className="w-4 h-4" /> Pending
                     </TabsTrigger>
-                    <TabsTrigger value="processing" className="flex items-center gap-2">
+                    <TabsTrigger value="processing" className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         <Filter className="w-4 h-4" /> Processing
                     </TabsTrigger>
-                    <TabsTrigger value="history" className="flex items-center gap-2">
+                    <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:shadow-sm">
                         <FileText className="w-4 h-4" /> History
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="pending">
-                    <Card>
+                    <Card className="border-border/40 rounded-2xl overflow-hidden">
                         <CardContent className="p-0">
                             <RequestsTable data={filterRequests(['PENDING'])} />
                         </CardContent>
@@ -307,7 +302,7 @@ const Withdrawals: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="processing">
-                    <Card>
+                    <Card className="border-border/40 rounded-2xl overflow-hidden">
                         <CardContent className="p-0">
                             <RequestsTable data={filterRequests(['APPROVED', 'PROCESSING'])} />
                         </CardContent>
@@ -315,7 +310,7 @@ const Withdrawals: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="history">
-                    <Card>
+                    <Card className="border-border/40 rounded-2xl overflow-hidden">
                         <CardContent className="p-0">
                             <RequestsTable data={filterRequests(['COMPLETED', 'REJECTED', 'CANCELLED'])} />
                         </CardContent>
