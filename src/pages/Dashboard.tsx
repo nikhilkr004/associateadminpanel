@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { FileDown, Users, Target, UserCheck, Calendar, Wallet, IndianRupee, Activity } from 'lucide-react';
+import { Users, UserCheck, Calendar, IndianRupee } from 'lucide-react';
 import StatCard from '@/components/StatCard';
 import BookingsChart from '@/components/BookingsChart';
 import CanceledBookingsChart from '@/components/CanceledBookingsChart';
@@ -16,119 +15,72 @@ const formatCurrency = (value: number) => {
   return `₹${value.toFixed(0)}`;
 };
 
+const formatNumber = (value: number) => {
+  return new Intl.NumberFormat('en-IN').format(value);
+};
+
 const Dashboard: React.FC = () => {
   const { data: stats, isLoading } = useDashboardStats();
 
   const statCards = [
     {
       title: 'Total Users',
-      value: isLoading ? '...' : stats?.totalUsers || 0,
-      percentage: stats ? Math.min(Math.round((stats.totalUsers / 100) * 100), 100) : 0,
+      value: isLoading ? '...' : formatNumber(stats?.totalUsers || 0),
+      change: '+12.5%',
+      changeType: 'positive' as const,
       icon: Users,
-      iconBgColor: 'bg-info-light text-info',
-      progressColor: 'bg-info',
+      iconBgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
     },
     {
-      title: 'Total Advisors',
-      value: isLoading ? '...' : stats?.totalAdvisors || 0,
-      percentage: stats ? Math.min(Math.round((stats.totalAdvisors / 50) * 100), 100) : 0,
+      title: 'Active Advisors',
+      value: isLoading ? '...' : formatNumber(stats?.totalAdvisors || 0),
+      change: '+8.2%',
+      changeType: 'positive' as const,
       icon: UserCheck,
-      iconBgColor: 'bg-chart-purple/10 text-chart-purple',
-      progressColor: 'bg-chart-purple',
+      iconBgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
     },
     {
-      title: 'Pending Approvals',
-      value: isLoading ? '...' : stats?.pendingAdvisors || 0,
-      percentage: stats?.totalAdvisors ? Math.round((stats.pendingAdvisors / stats.totalAdvisors) * 100) : 0,
-      icon: Target,
-      iconBgColor: 'bg-warning-light text-warning',
-      progressColor: 'bg-warning',
-    },
-    {
-      title: 'Total Bookings',
-      value: isLoading ? '...' : stats?.totalBookings || 0,
-      percentage: stats ? Math.min(Math.round((stats.todayBookings / Math.max(stats.totalBookings, 1)) * 100), 100) : 0,
+      title: "Today's Sessions",
+      value: isLoading ? '...' : formatNumber(stats?.todayBookings || 0),
+      change: '+15.3%',
+      changeType: 'positive' as const,
       icon: Calendar,
-      iconBgColor: 'bg-success-light text-success',
-      progressColor: 'bg-success',
+      iconBgColor: 'bg-violet-50',
+      iconColor: 'text-violet-600',
     },
-  ];
-
-  const revenueCards = [
     {
-      title: 'Total Revenue',
+      title: 'Revenue (MTD)',
       value: isLoading ? '...' : formatCurrency(stats?.totalRevenue || 0),
-      percentage: 100,
+      change: '+22.1%',
+      changeType: 'positive' as const,
       icon: IndianRupee,
-      iconBgColor: 'bg-success-light text-success',
-      progressColor: 'bg-success',
-    },
-    {
-      title: "Today's Earnings",
-      value: isLoading ? '...' : formatCurrency(stats?.todayRevenue || 0),
-      percentage: stats?.totalRevenue ? Math.min(Math.round((stats.todayRevenue / stats.totalRevenue) * 100), 100) : 0,
-      icon: Activity,
-      iconBgColor: 'bg-info-light text-info',
-      progressColor: 'bg-info',
-    },
-    {
-      title: 'Active Sessions',
-      value: isLoading ? '...' : stats?.activeBookings || 0,
-      percentage: stats?.totalBookings ? Math.min(Math.round((stats.activeBookings / stats.totalBookings) * 100), 100) : 0,
-      icon: Calendar,
-      iconBgColor: 'bg-warning-light text-warning',
-      progressColor: 'bg-warning',
-    },
-    {
-      title: 'Wallet Balance',
-      value: isLoading ? '...' : formatCurrency(stats?.totalWalletBalance || 0),
-      percentage: 100,
-      icon: Wallet,
-      iconBgColor: 'bg-chart-purple/10 text-chart-purple',
-      progressColor: 'bg-chart-purple',
+      iconBgColor: 'bg-amber-50',
+      iconColor: 'text-amber-600',
     },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-slide-down">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <Button className="gap-2 shadow-md hover-lift group">
-          <FileDown className="h-4 w-4 transition-transform group-hover:scale-110" />
-          Generate Report
-        </Button>
-      </div>
-
-      {/* User & Advisor Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, index) => (
-          <StatCard key={stat.title} {...stat} delay={index * 100} />
-        ))}
-      </div>
-
-      {/* Revenue & Sessions Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {revenueCards.map((stat, index) => (
-          <StatCard key={stat.title} {...stat} delay={(index + 4) * 100} />
+    <div className="space-y-6 p-1">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {statCards.map((stat) => (
+          <StatCard key={stat.title} {...stat} />
         ))}
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 animate-slide-up stagger-3">
-          <div className="hover-lift transition-all duration-300">
-            <BookingsChart />
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <BookingsChart />
         </div>
-        <div className="animate-slide-up stagger-4">
-          <div className="hover-lift transition-all duration-300">
-            <CanceledBookingsChart />
-          </div>
+        <div>
+          <CanceledBookingsChart />
         </div>
       </div>
 
-      {/* Recent Complaints Table */}
+      {/* Recent Activity Table */}
       <RecentComplaintsTable />
     </div>
   );

@@ -1,25 +1,20 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Calendar, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const data = [
-  { name: 'All Bookings', value: 60, color: 'hsl(var(--chart-orange))' },
-  { name: 'Upcoming', value: 30, color: 'hsl(var(--chart-blue))' },
-  { name: 'Canceled', value: 10, color: 'hsl(var(--chart-red))' },
+  { name: 'Chat', value: 50, color: '#3B82F6' },
+  { name: 'Audio', value: 25, color: '#22C55E' },
+  { name: 'Video', value: 25, color: '#F97316' },
 ];
+
+const total = data.reduce((sum, item) => sum + item.value, 0);
 
 const CanceledBookingsChart: React.FC = () => {
   return (
-    <div className="bg-card rounded-xl p-6 shadow-card border border-border/50 transition-all duration-300 hover:shadow-elevated">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Canceled Bookings</h3>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Calendar className="h-4 w-4" />
-          Monthly
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="bg-card rounded-2xl p-6 border border-border/40 h-full">
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        Session Type Distribution
+      </h3>
 
       <div className="flex items-center justify-center">
         <div className="relative h-[200px] w-[200px]">
@@ -29,9 +24,9 @@ const CanceledBookingsChart: React.FC = () => {
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={85}
-                paddingAngle={3}
+                innerRadius={65}
+                outerRadius={90}
+                paddingAngle={2}
                 dataKey="value"
                 strokeWidth={0}
               >
@@ -42,26 +37,23 @@ const CanceledBookingsChart: React.FC = () => {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xs text-muted-foreground">Total</span>
-            <span className="text-2xl font-bold text-foreground">100%</span>
+            <span className="text-3xl font-bold text-foreground">1,240</span>
+            <span className="text-sm text-muted-foreground">Total</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-6 space-y-3">
         {data.map((item) => (
           <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span
-                className="h-3 w-3 rounded-full"
+                className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: item.color }}
               />
               <span className="text-sm text-foreground">{item.name}</span>
             </div>
-            <span 
-              className="text-sm font-medium"
-              style={{ color: item.color }}
-            >
+            <span className="text-sm font-semibold text-foreground">
               {item.value}%
             </span>
           </div>
