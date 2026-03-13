@@ -9,7 +9,8 @@ import {
   UserCheck,
   LogOut,
   X,
-  MessageSquareWarning
+  MessageSquareWarning,
+  SlidersHorizontal
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -45,6 +46,14 @@ const clientMenuItems = [
     label: 'Complaints',
     icon: MessageSquareWarning,
     path: '/dashboard/complaints',
+  },
+];
+
+const configMenuItems = [
+  {
+    label: 'App Settings',
+    icon: SlidersHorizontal,
+    path: '/dashboard/app-settings',
   },
 ];
 
@@ -123,6 +132,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </p>
             <div className="space-y-1">
               {clientMenuItems.map((item) => (
+                <NavItem key={item.path} item={item} />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="px-4 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Configuration
+            </p>
+            <div className="space-y-1">
+              {configMenuItems.map((item) => (
                 <NavItem key={item.path} item={item} />
               ))}
             </div>

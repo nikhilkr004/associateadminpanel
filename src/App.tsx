@@ -17,6 +17,7 @@ import Complaints from "./pages/Complaints";
 import ComplaintDetail from "./pages/ComplaintDetail";
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
+import AppSettings from "./pages/AppSettings";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="withdrawals" element={<Withdrawals />} />
               <Route path="complaints" element={<Complaints />} />
               <Route path="complaints/:ticketId" element={<ComplaintDetail />} />
+              <Route path="app-settings" element={<AppSettings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
