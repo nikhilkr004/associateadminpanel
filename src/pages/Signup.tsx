@@ -8,12 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const Login: React.FC = () => {
+const Signup: React.FC = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -23,17 +24,17 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await signup(email, password, name);
       toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
+        title: 'Registration Successful',
+        description: 'Your account has been created and is pending approval from the Super Admin.',
       });
-      navigate('/dashboard');
+      navigate('/login');
     } catch (err: any) {
-      const errorMessage = getErrorMessage(err.message === 'not-approved' ? err.message : err.code);
+      const errorMessage = getErrorMessage(err.code);
       setError(errorMessage);
       toast({
-        title: 'Login failed',
+        title: 'Signup failed',
         description: errorMessage,
         variant: 'destructive',
       });
@@ -43,20 +44,13 @@ const Login: React.FC = () => {
   };
 
   const getErrorMessage = (code: string): string => {
-    if (code === 'not-approved') {
-      return 'Your account is pending approval or you do not have admin rights.';
-    }
     switch (code) {
+      case 'auth/email-already-in-use':
+        return 'This email is already registered.';
       case 'auth/invalid-email':
         return 'Invalid email address.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password.';
-      case 'auth/invalid-credential':
-        return 'Invalid email or password.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters.';
       default:
         return 'An error occurred. Please try again.';
     }
@@ -73,8 +67,8 @@ const Login: React.FC = () => {
                 <span className="text-2xl font-bold text-primary">Associate Admin</span>
               </div>
             </div>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your admin account</CardDescription>
+            <CardTitle className="text-2xl">Create Account</CardTitle>
+            <CardDescription>Sign up for an admin account</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -85,6 +79,19 @@ const Login: React.FC = () => {
                 </div>
               )}
               
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="h-11"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -108,6 +115,7 @@ const Login: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="h-11"
+                  minLength={6}
                 />
               </div>
 
@@ -119,17 +127,17 @@ const Login: React.FC = () => {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Creating account...
                   </>
                 ) : (
-                  'Sign in'
+                  'Sign up'
                 )}
               </Button>
 
               <div className="text-center mt-6 text-sm text-muted-foreground">
-                Don't have an admin account?{' '}
-                <Link to="/signup" className="text-primary font-medium hover:underline">
-                  Request access
+                Already have an account?{' '}
+                <Link to="/login" className="text-primary font-medium hover:underline">
+                  Sign in
                 </Link>
               </div>
             </form>
@@ -140,4 +148,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Signup;

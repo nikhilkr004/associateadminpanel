@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
 
 interface UserData {
   email: string;
   role: string;
   displayName?: string;
+  isApproved?: boolean;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -36,35 +38,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      
       if (firebaseUser) {
         // Fetch user role from Firestore
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const userDoc = await getDoc(doc(db, 'admin_users', firebaseUser.uid));
           if (userDoc.exists()) {
             const data = userDoc.data() as UserData;
             setUserData(data);
-            setIsAdmin(data.role === 'admin');
+            
+            if (data.role === 'admin' && data.isApproved === true) {
+              setUser(firebaseUser);
+              setIsAdmin(true);
+            } else {
+              setUser(null);
+              setIsAdmin(false);
+              await signOut(auth); // Sign out if not approved
+            }
           } else {
-            // Default to admin if no Firestore data
-            setUserData({
-              email: firebaseUser.email || '',
-              role: 'admin',
-              displayName: firebaseUser.displayName || 'Admin User'
-            });
-            setIsAdmin(true);
+            // Document doesn't exist, log them out
+            setUser(null);
+            setIsAdmin(false);
+            setUserData(null);
+            await signOut(auth);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
-          setUserData({
-            email: firebaseUser.email || '',
-            role: 'admin',
-            displayName: 'Admin User'
-          });
-          setIsAdmin(true);
+          setUser(null);
+          setUserData(null);
+          setIsAdmin(false);
+          await signOut(auth);
         }
       } else {
+        setUser(null);
         setUserData(null);
         setIsAdmin(false);
       }
@@ -76,7 +81,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userDoc = await getDoc(doc(db, 'admin_users', userCredential.user.uid));
+    
+    if (userDoc.exists()) {
+      const data = userDoc.data() as UserData;
+      if (data.role !== 'admin' || data.isApproved !== true) {
+        await signOut(auth);
+        throw new Error('not-approved');
+      }
+    } else {
+      await signOut(auth);
+      throw new Error('not-approved');
+    }
+  };
+
+  const signup = async (email: string, password: string, name: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+    
+    await setDoc(doc(db, 'admin_users', uid), {
+      email,
+      displayName: name,
+      role: 'admin',
+      isApproved: false,
+      createdAt: serverTimestamp()
+    });
+    
+    // Sign out immediately so they don't have access until approved
+    await signOut(auth);
   };
 
   const logout = async () => {
@@ -89,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     isAdmin,
     login,
+    signup,
     logout
   };
 
