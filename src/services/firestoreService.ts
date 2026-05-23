@@ -803,3 +803,95 @@ export const getUserDetailsFull = async (userId: string): Promise<UserDetailData
     throw error;
   }
 };
+
+// --- Admin Panel Bookings Management ---
+
+export interface GlobalBooking {
+  id: string; // The firestore doc ID
+  type: 'instant' | 'scheduled';
+  studentName: string;
+  advisorName: string;
+  bookingType: string; // AUDIO, VIDEO, CHAT
+  status: string; // pending, accepted, completed, cancelled, etc.
+  paymentStatus: string;
+  sessionAmount: number;
+  timestamp: Date;
+  scheduledDate?: string;
+  scheduledSlot?: string;
+  studentId: string;
+  advisorId: string;
+}
+
+export const getAllBookings = async (): Promise<GlobalBooking[]> => {
+  const bookings: GlobalBooking[] = [];
+  
+  try {
+    // 1. Fetch Instant Bookings
+    const instantSnap = await getDocs(collection(db, 'instant_bookings'));
+    instantSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      bookings.push({
+        id: docSnap.id,
+        type: 'instant',
+        studentName: data.studentName || 'Unknown',
+        advisorName: data.advisorName || 'Unknown',
+        bookingType: data.bookingType || 'Unknown',
+        status: data.bookingStatus || 'pending',
+        paymentStatus: data.paymentStatus || 'pending',
+        sessionAmount: data.sessionAmount || data.totalPrice || 0,
+        timestamp: data.timestamp?.toDate?.() || new Date(),
+        studentId: data.studentId || '',
+        advisorId: data.advisorId || ''
+      });
+    });
+
+    // 2. Fetch Scheduled Bookings
+    const scheduledSnap = await getDocs(collection(db, 'scheduled_bookings'));
+    scheduledSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      bookings.push({
+        id: docSnap.id,
+        type: 'scheduled',
+        studentName: data.studentName || 'Unknown',
+        advisorName: data.advisorName || 'Unknown',
+        bookingType: data.bookingType || 'Unknown',
+        status: data.bookingStatus || 'pending',
+        paymentStatus: data.paymentStatus || 'pending',
+        sessionAmount: data.sessionAmount || data.totalPrice || 0,
+        timestamp: data.bookingTimestamp?.toDate?.() || data.timestamp?.toDate?.() || new Date(),
+        scheduledDate: data.bookingDate,
+        scheduledSlot: data.bookingSlot,
+        studentId: data.studentId || '',
+        advisorId: data.advisorId || ''
+      });
+    });
+
+    // Sort descending by timestamp
+    return bookings.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+  } catch (error) {
+    console.error("Error fetching all bookings:", error);
+    throw error;
+  }
+};
+
+export const cancelBooking = async (bookingId: string, type: 'instant' | 'scheduled'): Promise<void> => {
+  try {
+    const collectionName = type === 'instant' ? 'instant_bookings' : 'scheduled_bookings';
+    const docRef = doc(db, collectionName, bookingId);
+    
+    // For admin cancellations, we just update status to cancelled
+    // The refund logic could be implemented here via transaction if needed,
+    // but for now we reflect the cancellation in Firestore.
+    await updateDoc(docRef, {
+      bookingStatus: 'cancelled',
+      paymentStatus: 'refunded',
+      updatedAt: serverTimestamp(),
+      cancelledBy: 'admin'
+    });
+    
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    throw error;
+  }
+};

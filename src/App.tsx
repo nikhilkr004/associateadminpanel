@@ -18,6 +18,7 @@ import ComplaintDetail from "./pages/ComplaintDetail";
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import AppSettings from "./pages/AppSettings";
+import Bookings from "./pages/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -47,7 +48,7 @@ const App = () => (
               <Route path="users/:userId" element={<UserDetail />} />
               <Route path="advisors" element={<Advisors />} />
               <Route path="advisors/:advisorId" element={<AdvisorDetail />} />
-              <Route path="bookings" element={<Dashboard />} />
+              <Route path="bookings" element={<Bookings />} />
               <Route path="withdrawals" element={<Withdrawals />} />
               <Route path="complaints" element={<Complaints />} />
               <Route path="complaints/:ticketId" element={<ComplaintDetail />} />
