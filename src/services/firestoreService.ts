@@ -408,17 +408,33 @@ export const completeWithdrawalRequest = async (
     });
 
     // Update Advisor Financials
-    // Decrement pendingBalance, Increment totalWithdrawn
+    // Decrement pendingBalance, Increment totalWithdrawn, and Decrement pendingWithdrawals
     const advisorData = advisorDoc.data();
     const currentPending = advisorData.earningsInfo?.pendingBalance || 0;
     const currentTotalWithdrawn = advisorData.earningsInfo?.totalWithdrawn || 0;
+    const currentPendingWithdrawals = advisorData.earningsInfo?.pendingWithdrawals || 0;
 
     const newPendingBalance = currentPending - amount;
     const newTotalWithdrawn = currentTotalWithdrawn + amount;
+    const newPendingWithdrawals = currentPendingWithdrawals - amount;
 
     transaction.update(advisorRef, {
       'earningsInfo.pendingBalance': newPendingBalance,
-      'earningsInfo.totalWithdrawn': newTotalWithdrawn
+      'earningsInfo.totalWithdrawn': newTotalWithdrawn,
+      'earningsInfo.pendingWithdrawals': newPendingWithdrawals < 0 ? 0 : newPendingWithdrawals
+    });
+
+    // Create Notification
+    const notificationRef = doc(collection(db, 'notifications'));
+    transaction.set(notificationRef, {
+      advisorId: advisorId,
+      title: "Withdrawal Approved",
+      message: `Your withdrawal request of ₹${amount} has been approved.`,
+      body: `Your withdrawal request of ₹${amount} has been approved.\nTransaction ID: ${transactionDetails.transactionId}\nUTR: ${transactionDetails.utrNumber}\nMode: ${transactionDetails.paymentMode}\nAdmin Notes: ${transactionDetails.adminNotes || "None"}`,
+      timestamp: Date.now(),
+      isRead: false,
+      type: "withdrawal",
+      profileImage: ""
     });
   });
 };
@@ -444,13 +460,27 @@ export const rejectWithdrawalRequest = async (
       rejectionReason: rejectionReason
     });
 
-    // Note: We do NOT refund the balance here because the system deducts it only upon successful withdrawal request creation
-    // AND if the request creation failed, well, it wouldn't be here.
-    // If the logic was "deduct on request", then rejecting should refund.
-    // However, the user explicitly stated that the current logic (which refunded) was creating a DOUBLE balance.
-    // This implies the balance wasn't deducted, OR the user's premise about "double balance" means 
-    // "it adds it back but it was already there".
-    // So we remove the balance update logic entirely here.
+    // Release the locked funds back to the Available Balance by decrementing pendingWithdrawals
+    const advisorData = advisorDoc.data();
+    const currentPendingWithdrawals = advisorData.earningsInfo?.pendingWithdrawals || 0;
+    const newPendingWithdrawals = currentPendingWithdrawals - amount;
+
+    transaction.update(advisorRef, {
+      'earningsInfo.pendingWithdrawals': newPendingWithdrawals < 0 ? 0 : newPendingWithdrawals
+    });
+
+    // Create Notification
+    const notificationRef = doc(collection(db, 'notifications'));
+    transaction.set(notificationRef, {
+      advisorId: advisorId,
+      title: "Withdrawal Rejected",
+      message: `Your withdrawal request of ₹${amount} has been rejected.`,
+      body: `Your withdrawal request of ₹${amount} has been rejected.\nReason: ${rejectionReason}`,
+      timestamp: Date.now(),
+      isRead: false,
+      type: "withdrawal",
+      profileImage: ""
+    });
   });
 };
 
